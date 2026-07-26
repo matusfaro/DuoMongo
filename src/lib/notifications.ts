@@ -41,14 +41,12 @@ export async function scheduleDailyReminder(time: string, streak: number) {
           title: 'Монгол хэл сурцгаая! 🇲🇳',
           body: 'Time for your daily Mongolian lesson. Keep it up!',
           schedule: { on: { hour, minute }, allowWhileIdle: true },
-          smallIcon: 'ic_stat_icon_config_sample',
         },
         {
           id: STREAK_ID,
           title: streak > 0 ? `Don't lose your ${streak}-day streak! 🔥` : 'Your streak is waiting 🔥',
           body: 'A quick 3-minute lesson keeps the streak alive.',
           schedule: { on: { hour: 21, minute: 30 }, allowWhileIdle: true },
-          smallIcon: 'ic_stat_icon_config_sample',
         },
       ],
     });

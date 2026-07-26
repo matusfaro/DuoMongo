@@ -1,32 +1,51 @@
-# React + TypeScript + Vite
+# DuoMongo 🇲🇳
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A Duolingo-style app for learning **Mongolian** (Cyrillic script) as an English
+speaker. Fully offline, single-user — all data stays on the device. Built with
+React + Vite + Capacitor, runs in any browser for development and as a native
+Android app.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Course**: 19 skills across 4 sections (Basics, Greetings, Family, Numbers,
+  Food, Colors, Animals, Questions, Verbs, Time, Places, Adjectives,
+  Pronouns & Cases, Weather, Body, Clothes, Past/Future tense, Travel Phrases)
+  with ~190 vocabulary items, ~120 sentences, romanization, and grammar tips
+  per skill.
+- **Exercise types**: multiple choice (both directions), word-bank sentence
+  translation (both directions), matching pairs, typed translation, and
+  listening comprehension (uses the device's text-to-speech).
+- **Crown levels**: each skill has 5 levels × 3 lessons; higher levels serve
+  harder exercise types. Skills unlock sequentially.
+- **Spaced repetition**: every word/sentence is tracked with an SM-2-style
+  scheduler; the Practice tab reviews due or weakest items.
+- **Gamification**: XP with a configurable daily goal, streak with streak
+  freezes, gems, hearts (optional), combo bonuses, 16 achievements.
+- **Stats**: weekly XP chart, 12-week activity heatmap, accuracy, time spent,
+  words learned, best streak.
+- **Reminders**: daily lesson notification at a configurable time plus an
+  evening streak-saver nudge (Capacitor local notifications).
 
-## React Compiler
+## Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev        # test in a browser
+npm run build      # type-check + production bundle in dist/
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Android
+
+```sh
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+Note: `android/gradle.properties` pins `org.gradle.java.home` to a local
+OpenJDK 21 (AGP's jlink transform fails on GraalVM/newer JDKs) — adjust the
+path for your machine.
+
+All progress is stored in `localStorage` under `duomongo-state-v1`; the
+"Danger zone" in the Profile tab resets it.
