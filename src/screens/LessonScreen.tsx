@@ -130,12 +130,10 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     }
     if (ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, correct);
     setFeedback({ kind: correct ? 'correct' : 'wrong', correctAnswer });
-    // speak the Mongolian on correct answers for reinforcement
-    if (correct && 'speak' in ex && ex.speak && ex.type !== 'listen-choice' && ex.type !== 'minpair') speak(ex.speak);
 
     if (correct) {
-      // auto-advance — no CONTINUE tap needed when right
-      advTimer.current = setTimeout(() => advance(true, ex), 900);
+      // auto-advance quickly — no CONTINUE tap needed when right
+      advTimer.current = setTimeout(() => advance(true, ex), 400);
     } else if (getState().settings.heartsEnabled && getState().hearts <= 0) {
       setTimeout(() => finish(true), 1200);
     }
