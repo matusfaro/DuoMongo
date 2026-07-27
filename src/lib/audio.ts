@@ -14,10 +14,12 @@ async function pickNativeLang(): Promise<string> {
   if (nativeLang) return nativeLang;
   try {
     const { languages } = await TextToSpeech.getSupportedLanguages();
-    const lower = languages.map((l) => l.toLowerCase());
-    if (lower.some((l) => l.startsWith('mn'))) nativeLang = languages[lower.findIndex((l) => l.startsWith('mn'))];
-    else if (lower.some((l) => l.startsWith('ru'))) nativeLang = languages[lower.findIndex((l) => l.startsWith('ru'))];
-    else nativeLang = 'ru-RU';
+    // Compare the primary language subtag exactly: 'mn' must not match 'mni' (Manipuri)
+    const primary = (l: string) => l.toLowerCase().split(/[-_]/)[0];
+    nativeLang =
+      languages.find((l) => primary(l) === 'mn') ??
+      languages.find((l) => primary(l) === 'ru') ??
+      'ru-RU';
   } catch {
     nativeLang = 'ru-RU';
   }
