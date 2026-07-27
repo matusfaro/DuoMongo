@@ -1,4 +1,28 @@
-// Text-to-speech for Mongolian via the Web Speech API, plus UI sound effects.
+// Text-to-speech for Mongolian, plus UI sound effects.
+// Native platforms use the OS speech engine (Android WebView has no Web Speech
+// API); browsers use speechSynthesis. Both prefer a Mongolian voice and fall
+// back to Russian, which shares Cyrillic phonetics.
+
+import { Capacitor } from '@capacitor/core';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+
+const isNative = Capacitor.isNativePlatform();
+
+let nativeLang: string | null = null;
+
+async function pickNativeLang(): Promise<string> {
+  if (nativeLang) return nativeLang;
+  try {
+    const { languages } = await TextToSpeech.getSupportedLanguages();
+    const lower = languages.map((l) => l.toLowerCase());
+    if (lower.some((l) => l.startsWith('mn'))) nativeLang = languages[lower.findIndex((l) => l.startsWith('mn'))];
+    else if (lower.some((l) => l.startsWith('ru'))) nativeLang = languages[lower.findIndex((l) => l.startsWith('ru'))];
+    else nativeLang = 'ru-RU';
+  } catch {
+    nativeLang = 'ru-RU';
+  }
+  return nativeLang;
+}
 
 let mnVoice: SpeechSynthesisVoice | null = null;
 let voicesLoaded = false;
@@ -26,6 +50,18 @@ export function hasMongolianVoice(): boolean {
 
 /** Speak Mongolian text. Falls back to a Russian voice (shared Cyrillic phonetics) if no mn voice. */
 export function speak(text: string) {
+  if (isNative) {
+    void (async () => {
+      try {
+        const lang = await pickNativeLang();
+        await TextToSpeech.stop().catch(() => {});
+        await TextToSpeech.speak({ text, lang, rate: 0.85, pitch: 1.0, volume: 1.0 });
+      } catch {
+        // no speech engine available; stay silent
+      }
+    })();
+    return;
+  }
   if (typeof speechSynthesis === 'undefined') return;
   if (!voicesLoaded) findVoice();
   speechSynthesis.cancel();
