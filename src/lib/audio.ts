@@ -5,6 +5,11 @@
 
 import { Capacitor } from '@capacitor/core';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import manifestJson from '../data/audio-manifest.json';
+
+// Bundled real-Mongolian clips (mn-MN neural voice, generated at build time)
+const clipMap = new Map<string, string>(Object.entries(manifestJson as Record<string, string>));
+let currentClip: HTMLAudioElement | null = null;
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -50,8 +55,27 @@ export function hasMongolianVoice(): boolean {
   return mnVoice !== null;
 }
 
-/** Speak Mongolian text. Falls back to a Russian voice (shared Cyrillic phonetics) if no mn voice. */
+/** Speak Mongolian text: bundled native-speaker clip when available, else TTS fallback. */
 export function speak(text: string) {
+  const file = clipMap.get(text);
+  if (file) {
+    try {
+      currentClip?.pause();
+      if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+      currentClip = new Audio(`/audio/${file}`);
+      void currentClip.play().then(
+        () => {},
+        () => speakTts(text) // autoplay refusal or missing file
+      );
+      return;
+    } catch {
+      // fall through to TTS
+    }
+  }
+  speakTts(text);
+}
+
+function speakTts(text: string) {
   if (isNative) {
     void (async () => {
       try {
