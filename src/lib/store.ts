@@ -24,6 +24,7 @@ function defaultState(): AppState {
     lessonsCompleted: 0,
     perfectLessons: 0,
     practiceSessions: 0,
+    storiesDone: {},
     totalAnswers: 0,
     correctAnswers: 0,
     timeSpentMs: 0,

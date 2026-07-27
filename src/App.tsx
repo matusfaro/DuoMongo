@@ -11,8 +11,10 @@ import { PathScreen } from './screens/PathScreen';
 import { PracticeScreen } from './screens/PracticeScreen';
 import { StatsScreen } from './screens/StatsScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
+import { StoriesScreen } from './screens/StoriesScreen';
+import { DictionaryScreen } from './screens/DictionaryScreen';
 
-type Tab = 'learn' | 'practice' | 'stats' | 'profile';
+type Tab = 'learn' | 'practice' | 'dict' | 'stats' | 'profile';
 
 interface ActiveLesson {
   exercises: Exercise[];
@@ -29,6 +31,7 @@ interface ResultView {
 export default function App() {
   const app = useAppState();
   const [tab, setTab] = useState<Tab>('learn');
+  const [storiesOpen, setStoriesOpen] = useState(false);
   const [lesson, setLesson] = useState<ActiveLesson | null>(null);
   const [resultView, setResultView] = useState<ResultView | null>(null);
   const [noHearts, setNoHearts] = useState(false);
@@ -134,8 +137,14 @@ export default function App() {
       </header>
 
       <main className="content">
-        {tab === 'learn' && <PathScreen onStartLesson={startLesson} />}
+        {tab === 'learn' &&
+          (storiesOpen ? (
+            <StoriesScreen onBack={() => setStoriesOpen(false)} />
+          ) : (
+            <PathScreen onStartLesson={startLesson} onOpenStories={() => setStoriesOpen(true)} />
+          ))}
         {tab === 'practice' && <PracticeScreen onStartPractice={startPractice} />}
+        {tab === 'dict' && <DictionaryScreen />}
         {tab === 'stats' && <StatsScreen />}
         {tab === 'profile' && <ProfileScreen />}
       </main>
@@ -145,6 +154,7 @@ export default function App() {
           [
             ['learn', '🏠', 'Learn'],
             ['practice', '🧠', 'Practice'],
+            ['dict', '📖', 'Words'],
             ['stats', '📊', 'Stats'],
             ['profile', '👤', 'Profile'],
           ] as [Tab, string, string][]

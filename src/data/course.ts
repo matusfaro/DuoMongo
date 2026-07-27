@@ -1,8 +1,9 @@
 import type { Section, Skill, VocabItem, Sentence } from '../types';
 import { section1, section2 } from './course1';
 import { section3, section4 } from './course2';
+import { section5 } from './course3';
 
-export const sections: Section[] = [section1, section2, section3, section4];
+export const sections: Section[] = [section1, section2, section3, section4, section5];
 
 export const allSkills: Skill[] = sections.flatMap((s) => s.skills);
 

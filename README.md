@@ -7,14 +7,17 @@ Android app.
 
 ## Features
 
-- **Course**: 19 skills across 4 sections (Basics, Greetings, Family, Numbers,
+- **Course**: 25 skills across 5 sections (Basics, Greetings, Family, Numbers,
   Food, Colors, Animals, Questions, Verbs, Time, Places, Adjectives,
-  Pronouns & Cases, Weather, Body, Clothes, Past/Future tense, Travel Phrases)
-  with ~195 vocabulary items, ~130 sentences, romanization, and grammar tips
+  Pronouns & Cases, Weather, Body, Clothes, Past/Future tense, Travel Phrases,
+  Numbers & Money, Days, Shopping, Directions, Feelings, Professions)
+  with ~245 vocabulary items, ~165 sentences, romanization, and grammar tips
   per skill.
-- **Exercise types**: multiple choice (both directions), word-bank sentence
-  translation (both directions), matching pairs, typed translation, and
-  listening comprehension.
+- **Exercise types** (12): multiple choice (both directions), word-bank
+  translation (both directions), dictation (assemble what you hear), matching
+  pairs, typed translation, listening comprehension, fill-in-the-blank,
+  pick-the-reply, minimal-pair ear training, emoji picture cards, and
+  speaking practice (record & compare with the native clip).
 - **Crown levels**: each skill has 5 levels × 3 lessons; higher levels serve
   harder exercise types. All skills are open from the start.
 - **Spaced repetition**: every word/sentence is tracked with an SM-2-style
@@ -23,6 +26,9 @@ Android app.
   freezes, gems, hearts (optional), combo bonuses, 16 achievements.
 - **Stats**: weekly XP chart, 12-week activity heatmap, accuracy, time spent,
   words learned, best streak.
+- **Stories**: four dialogues with line-by-line audio, tap-to-translate, and
+  comprehension questions.
+- **Dictionary**: searchable Words tab covering the whole course with audio.
 - **Audio**: bundled real-Mongolian clips (mn-MN neural voice) for every
   word and sentence, generated at build time; fully offline at runtime.
 - **Reminders**: daily lesson notification at a configurable time plus an

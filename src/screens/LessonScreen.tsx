@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
-import type { BankExercise, ChoiceExercise, Exercise, MatchExercise, TypeExercise } from '../types';
-import { BankEx, bankAnswerText, checkBank, ChoiceEx, checkType, MatchEx, TypeEx } from '../components/exercises';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { BankExercise, ChoiceExercise, Exercise, MatchExercise, ShadowExercise, TypeExercise } from '../types';
+import { BankEx, bankAnswerText, checkBank, ChoiceEx, checkType, MatchEx, ShadowEx, TypeEx } from '../components/exercises';
 import { playComplete, playCorrect, playWrong, speak } from '../lib/audio';
 import { getState, loseHeart, useAppState } from '../lib/store';
 import { reviewItem } from '../lib/srs';
@@ -42,6 +42,15 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
   const ex = queue[idx];
   const progress = idx / queue.length;
   const soundOn = app.settings.soundEnabled;
+
+  // Hear the Mongolian right away — except where it would reveal the answer
+  // (cloze speaks the full sentence, en→mn asks you to produce the Mongolian).
+  useEffect(() => {
+    if (!ex) return;
+    const autoSpeakTypes = new Set(['choice-mn-en', 'listen-choice', 'minpair', 'reply', 'picture', 'bank-mn-en', 'bank-listen-mn', 'type-mn-en', 'speak-shadow']);
+    if (autoSpeakTypes.has(ex.type) && 'speak' in ex && ex.speak) speak(ex.speak);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, queue]);
 
   const advTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -86,16 +95,20 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     resetAnswerState();
   };
 
+  const isChoiceType = (t: string) =>
+    t === 'choice-mn-en' || t === 'choice-en-mn' || t === 'listen-choice' || t === 'cloze' || t === 'reply' || t === 'minpair' || t === 'picture';
+  const isBankType = (t: string) => t === 'bank-mn-en' || t === 'bank-en-mn' || t === 'bank-listen-mn';
+
   const submit = (choiceIndex?: number) => {
     if (!ex || feedback) return;
     let correct = false;
     let correctAnswer = '';
-    if (ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice') {
+    if (isChoiceType(ex.type)) {
       const c = ex as ChoiceExercise;
       const picked = choiceIndex ?? selected;
       correct = picked === c.correctIndex;
       correctAnswer = c.options[c.correctIndex];
-    } else if (ex.type === 'bank-mn-en' || ex.type === 'bank-en-mn') {
+    } else if (isBankType(ex.type)) {
       const b = ex as BankExercise;
       correct = checkBank(b, chosen);
       correctAnswer = b.answerTokens.join(' ');
@@ -118,7 +131,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     if (ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, correct);
     setFeedback({ kind: correct ? 'correct' : 'wrong', correctAnswer });
     // speak the Mongolian on correct answers for reinforcement
-    if (correct && 'speak' in ex && ex.speak && ex.type !== 'listen-choice') speak(ex.speak);
+    if (correct && 'speak' in ex && ex.speak && ex.type !== 'listen-choice' && ex.type !== 'minpair') speak(ex.speak);
 
     if (correct) {
       // auto-advance — no CONTINUE tap needed when right
@@ -131,6 +144,20 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
   const continueNext = () => {
     if (!feedback || !ex) return;
     advance(feedback.kind === 'correct', ex);
+  };
+
+  // self-graded shadowing: honesty-based, never costs a heart
+  const gradeShadow = (good: boolean) => {
+    if (!ex) return;
+    totalRef.current.answers += 1;
+    if (good) {
+      totalRef.current.correct += 1;
+      if (soundOn) playCorrect();
+    } else {
+      if (soundOn) playWrong();
+    }
+    if (ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, good);
+    advance(good, ex);
   };
 
   const matchDone = () => {
@@ -178,7 +205,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       </div>
 
       <div className="lesson-body">
-        {(ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice') && (
+        {isChoiceType(ex.type) && (
           <ChoiceEx
             ex={ex as ChoiceExercise}
             showRo={app.settings.showRomanization}
@@ -190,16 +217,17 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
             }}
           />
         )}
-        {(ex.type === 'bank-mn-en' || ex.type === 'bank-en-mn') && (
+        {isBankType(ex.type) && (
           <BankEx ex={ex as BankExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} chosen={chosen} setChosen={setChosen} />
         )}
         {ex.type === 'type-mn-en' && (
           <TypeEx ex={ex as TypeExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} text={typed} setText={setTyped} onEnter={() => submit()} />
         )}
         {ex.type === 'match' && <MatchEx ex={ex as MatchExercise} onComplete={matchDone} onMistake={matchMistake} />}
+        {ex.type === 'speak-shadow' && <ShadowEx ex={ex as ShadowExercise} showRo={app.settings.showRomanization} onGrade={gradeShadow} />}
       </div>
 
-      {ex.type !== 'match' && (
+      {ex.type !== 'match' && ex.type !== 'speak-shadow' && (
         <div
           className={`lesson-footer ${feedback ? (feedback.kind === 'correct' ? 'fb-correct' : 'fb-wrong') : ''}`}
           onClick={feedback?.kind === 'correct' ? continueNext : undefined}
@@ -212,7 +240,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
                     <span className="fb-icon">✓</span>
                     <div>
                       <b>{['Nice!', 'Excellent!', 'Correct!', 'Сайн байна!'][Math.floor(Math.random() * 4)]}</b>
-                      {(ex.type === 'bank-mn-en' || ex.type === 'bank-en-mn') && <div className="fb-answer">{bankAnswerText(ex as BankExercise, chosen)}</div>}
+                      {isBankType(ex.type) && <div className="fb-answer">{bankAnswerText(ex as BankExercise, chosen)}</div>}
                     </div>
                   </>
                 ) : (
@@ -231,7 +259,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
                 </button>
               )}
             </div>
-          ) : ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice' ? (
+          ) : isChoiceType(ex.type) ? (
             <div className="tap-hint">Tap an answer</div>
           ) : (
             <button className="btn-big btn-green" disabled={!ready} onClick={() => submit()}>

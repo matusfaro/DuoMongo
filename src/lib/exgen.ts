@@ -1,5 +1,6 @@
-import type { AppState, BankExercise, ChoiceExercise, Exercise, MatchExercise, Sentence, Skill, TypeExercise, VocabItem } from '../types';
+import type { AppState, BankExercise, ChoiceExercise, Exercise, MatchExercise, ReplyPair, Sentence, ShadowExercise, Skill, TypeExercise, VocabItem } from '../types';
 import { allSkills, allVocab, sentenceByKey, skillById, vocabByKey } from '../data/course';
+import { MIN_PAIRS } from '../data/minpairs';
 
 // ---- utils ----
 
@@ -169,6 +170,116 @@ function typeFromSentence(skill: Skill, sent: Sentence): TypeExercise {
   };
 }
 
+/** Dictation: hear the Mongolian sentence, assemble it from Mongolian tiles. */
+function dictationFromSentence(skill: Skill, sent: Sentence): BankExercise {
+  const answerTokens = tokenize(sent.mn);
+  return {
+    type: 'bank-listen-mn',
+    prompt: sent.mn,
+    promptRo: sent.ro,
+    speak: sent.mn,
+    answerTokens,
+    bankTokens: shuffle([...answerTokens, ...bankDistractorTokens('mn', answerTokens, Math.min(4, answerTokens.length + 2))]),
+    acceptedAnswers: [normalizeAnswer(sent.mn)],
+    itemKey: `s:${skill.id}:${sent.id}`,
+  };
+}
+
+/** Cloze: fill the blanked word in a Mongolian sentence (English shown for context). */
+function clozeFromSentence(skill: Skill, sent: Sentence): ChoiceExercise | null {
+  const tokens = tokenize(sent.mn);
+  const candidates = tokens.map((t, i) => ({ t, i })).filter(({ t }) => t.length >= 2);
+  if (candidates.length === 0) return null;
+  const target = candidates[Math.floor(Math.random() * candidates.length)];
+  const blanked = tokens.map((t, i) => (i === target.i ? '_____' : t)).join(' ');
+  // distractors: same-language tokens from the global pool, not present in this sentence
+  const lowerTokens = new Set(tokens.map((t) => t.toLowerCase()));
+  const distractors = shuffle(allVocab.map((v) => v.mn))
+    .flatMap((s) => tokenize(s))
+    .filter((t) => !lowerTokens.has(t.toLowerCase()))
+    .filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i)
+    .slice(0, 3);
+  if (distractors.length < 3) return null;
+  const options = shuffle([target.t, ...distractors]);
+  return {
+    type: 'cloze',
+    prompt: blanked,
+    sub: `"${sent.en}"`,
+    speak: sent.mn, // spoken after answering — would give the answer away up front
+    options,
+    correctIndex: options.indexOf(target.t),
+    itemKey: `s:${skill.id}:${sent.id}`,
+  };
+}
+
+/** Pick the natural reply to a conversational prompt. */
+function replyExercise(skill: Skill, pair: ReplyPair): ChoiceExercise {
+  const options = shuffle([pair.aMn, ...pair.wrong]);
+  return {
+    type: 'reply',
+    prompt: pair.qMn,
+    promptRo: pair.qRo,
+    sub: `"${pair.qEn}"`,
+    speak: pair.qMn,
+    options,
+    correctIndex: options.indexOf(pair.aMn),
+    itemKey: `r:${skill.id}:${pair.id}`,
+  };
+}
+
+/** Minimal pair: hear one word, pick which of the lookalikes it was. */
+function minpairExercise(skill: Skill, pair: [string, string]): ChoiceExercise {
+  const target = pair[Math.floor(Math.random() * 2)];
+  const options = shuffle([...pair]);
+  const entry = [...vocabByKey.entries()].find(([, v]) => v.item.mn === target);
+  return {
+    type: 'minpair',
+    prompt: target,
+    speak: target,
+    options,
+    correctIndex: options.indexOf(target),
+    itemKey: entry ? entry[0] : `w:${skill.id}:minpair`,
+  };
+}
+
+/** Picture card: word (with audio) → pick the matching emoji. */
+function pictureFromVocab(skill: Skill, item: VocabItem, isNew: boolean): ChoiceExercise | null {
+  if (!item.emoji) return null;
+  const pool = shuffle(allVocab.filter((v) => v.emoji && v.emoji !== item.emoji && !meaningsOverlap(v, item)));
+  const distractors = [...new Set(pool.map((v) => v.emoji!))].slice(0, 3);
+  if (distractors.length < 3) return null;
+  const options = shuffle([item.emoji, ...distractors]);
+  return {
+    type: 'picture',
+    prompt: item.mn,
+    promptRo: item.ro,
+    speak: item.mn,
+    options,
+    correctIndex: options.indexOf(item.emoji),
+    bigOptions: true,
+    newWordId: isNew ? item.id : undefined,
+    itemKey: `w:${skill.id}:${item.id}`,
+  };
+}
+
+/** Shadowing: hear the native clip, record yourself, self-grade. */
+function shadowFromSentence(skill: Skill, sent: Sentence): ShadowExercise {
+  return {
+    type: 'speak-shadow',
+    prompt: sent.mn,
+    promptRo: sent.ro,
+    sub: `"${sent.en}"`,
+    speak: sent.mn,
+    itemKey: `s:${skill.id}:${sent.id}`,
+  };
+}
+
+/** Minimal pairs relevant to a skill (a pair member belongs to the skill's vocab). */
+function skillMinPairs(skill: Skill): [string, string][] {
+  const mns = new Set(skill.vocab.map((v) => v.mn));
+  return MIN_PAIRS.filter(([a, b]) => mns.has(a) || mns.has(b));
+}
+
 function matchFromVocab(skill: Skill, items: VocabItem[]): MatchExercise {
   return {
     type: 'match',
@@ -200,7 +311,9 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
   for (const v of vocab) {
     const isNew = !known.has(`w:${skill.id}:${v.id}`);
     if (isNew || crownLevel === 0) {
-      exercises.push(choiceFromVocab(skill, v, 'mn-en', isNew));
+      // introduce with a picture card when the word has one, else classic choice
+      const pic = Math.random() < 0.5 ? pictureFromVocab(skill, v, isNew) : null;
+      exercises.push(pic ?? choiceFromVocab(skill, v, 'mn-en', isNew));
       if (exercises.length % 3 === 0) exercises.push(choiceFromVocab(skill, v, 'en-mn', false));
     } else if (crownLevel <= 2) {
       exercises.push(choiceFromVocab(skill, v, Math.random() < 0.5 ? 'mn-en' : 'en-mn', false));
@@ -213,11 +326,41 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
     if (crownLevel === 0) {
       exercises.push(bankFromSentence(skill, s, 'mn-en'));
     } else if (crownLevel === 1) {
-      exercises.push(bankFromSentence(skill, s, Math.random() < 0.6 ? 'mn-en' : 'en-mn'));
+      const r = Math.random();
+      const cloze = r < 0.25 ? clozeFromSentence(skill, s) : null;
+      exercises.push(cloze ?? bankFromSentence(skill, s, r < 0.6 ? 'mn-en' : 'en-mn'));
     } else if (crownLevel <= 3) {
-      exercises.push(bankFromSentence(skill, s, Math.random() < 0.4 ? 'mn-en' : 'en-mn'));
+      const r = Math.random();
+      if (r < 0.2) {
+        exercises.push(dictationFromSentence(skill, s));
+      } else if (r < 0.4) {
+        exercises.push(clozeFromSentence(skill, s) ?? bankFromSentence(skill, s, 'en-mn'));
+      } else {
+        exercises.push(bankFromSentence(skill, s, r < 0.7 ? 'mn-en' : 'en-mn'));
+      }
     } else {
-      exercises.push(Math.random() < 0.5 ? typeFromSentence(skill, s) : bankFromSentence(skill, s, 'en-mn'));
+      const r = Math.random();
+      if (r < 0.3) exercises.push(typeFromSentence(skill, s));
+      else if (r < 0.5) exercises.push(dictationFromSentence(skill, s));
+      else if (r < 0.65) exercises.push(shadowFromSentence(skill, s));
+      else exercises.push(bankFromSentence(skill, s, 'en-mn'));
+    }
+  }
+
+  // conversational replies from crown 1 up
+  if (crownLevel >= 1 && skill.replies?.length) {
+    for (const pair of pick(skill.replies, Math.min(2, skill.replies.length))) {
+      exercises.push(replyExercise(skill, pair));
+    }
+  }
+
+  // ear training from crown 1 up when the skill has sound-alike words
+  if (crownLevel >= 1) {
+    const pairs = skillMinPairs(skill);
+    if (pairs.length > 0) {
+      for (const pair of pick(pairs, Math.min(2, pairs.length))) {
+        exercises.push(minpairExercise(skill, pair));
+      }
     }
   }
 
@@ -255,10 +398,17 @@ export function generatePractice(itemKeys: string[]): Exercise[] {
       const skill = skillById.get(entry.skillId);
       if (!skill) continue;
       const r = Math.random();
-      if (r < 0.45) exercises.push(bankFromSentence(skill, entry.item, 'mn-en'));
-      else if (r < 0.8) exercises.push(bankFromSentence(skill, entry.item, 'en-mn'));
+      if (r < 0.3) exercises.push(bankFromSentence(skill, entry.item, 'mn-en'));
+      else if (r < 0.55) exercises.push(bankFromSentence(skill, entry.item, 'en-mn'));
+      else if (r < 0.7) exercises.push(dictationFromSentence(skill, entry.item));
+      else if (r < 0.85) exercises.push(clozeFromSentence(skill, entry.item) ?? typeFromSentence(skill, entry.item));
       else exercises.push(typeFromSentence(skill, entry.item));
     }
+  }
+
+  // sprinkle in ear training during practice
+  for (const pair of pick(MIN_PAIRS, 2)) {
+    exercises.push(minpairExercise(allSkills[0], pair));
   }
 
   const cleanPool = unambiguousSubset(matchPool);

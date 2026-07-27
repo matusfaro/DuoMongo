@@ -1,0 +1,168 @@
+import type { Section } from '../types';
+
+// Section 5: Going Further
+
+export const section5: Section = {
+  id: 's5',
+  title: 'Going Further',
+  color: '#ff4b4b',
+  skills: [
+    {
+      id: 'bignumbers',
+      title: 'Numbers & Money',
+      icon: '💰',
+      tips:
+        'Tens: хорь 20, гуч 30, дөч 40, тавь 50, жар 60, дал 70, ная 80, ер 90.\n\nCompound numbers use the attributive form of the ten: хори**н** нэг = 21, гуч**ин** тав = 35.\n\nThe Mongolian currency is the **төгрөг** (₮). "Энэ хэдэн төгрөг вэ?" = "How many tögrög is this?"',
+      vocab: [
+        { id: 'khori', mn: 'хорь', ro: 'khori', en: 'twenty', alt: ['20'] },
+        { id: 'guch', mn: 'гуч', ro: 'guch', en: 'thirty', alt: ['30'] },
+        { id: 'doch', mn: 'дөч', ro: 'döch', en: 'forty', alt: ['40'] },
+        { id: 'tavi', mn: 'тавь', ro: 'tavi', en: 'fifty', alt: ['50'] },
+        { id: 'jar', mn: 'жар', ro: 'jar', en: 'sixty', alt: ['60'] },
+        { id: 'dal', mn: 'дал', ro: 'dal', en: 'seventy', alt: ['70'] },
+        { id: 'naya', mn: 'ная', ro: 'naya', en: 'eighty', alt: ['80'] },
+        { id: 'yer', mn: 'ер', ro: 'yer', en: 'ninety', alt: ['90'] },
+        { id: 'myanga', mn: 'мянга', ro: 'myanga', en: 'thousand', alt: ['1000', 'one thousand'] },
+        { id: 'togrog', emoji: '💵', mn: 'төгрөг', ro: 'tögrög', en: 'tögrög', alt: ['tugrik', 'togrog'] },
+        { id: 'mongo', emoji: '💰', mn: 'мөнгө', ro: 'möngö', en: 'money', alt: ['silver'] },
+        { id: 'une', mn: 'үнэ', ro: 'üne', en: 'price' },
+      ],
+      sentences: [
+        { id: 'bns1', mn: 'Энэ хэдэн төгрөг вэ?', ro: 'Ene kheden tögrög ve?', en: 'How many tögrög is this?', altEn: ['How much tögrög is this', 'How many tugrik is this'] },
+        { id: 'bns2', mn: 'Мянган төгрөг', ro: 'Myangan tögrög', en: 'One thousand tögrög', altEn: ['A thousand tögrög', 'Thousand tögrög'] },
+        { id: 'bns3', mn: 'Хорин нэг', ro: 'Khorin neg', en: 'Twenty one', altEn: ['21'] },
+        { id: 'bns4', mn: 'Надад мөнгө байна', ro: 'Nadad möngö baina', en: 'I have money', altEn: ['I have got money'] },
+        { id: 'bns5', mn: 'Үнэ хэд вэ?', ro: 'Üne khed ve?', en: 'What is the price?', altEn: ['How much is the price', 'How much'] },
+        { id: 'bns6', mn: 'Тавин төгрөг байна', ro: 'Tavin tögrög baina', en: 'It is fifty tögrög', altEn: ['It is 50 tögrög', 'Fifty tögrög'] },
+      ],
+    },
+    {
+      id: 'days',
+      title: 'Days of the Week',
+      icon: '📅',
+      tips:
+        'The days are named after planets, from Tibetan: Даваа (Mon), Мягмар (Tue), Лхагва (Wed), Пүрэв (Thu), Баасан (Fri), Бямба (Sat), Ням (Sun).\n\n**гараг** = day of the week: "Өнөөдөр Даваа гараг" = "Today is Monday".\n\nAdd **-т** for "on": Баасан гараг**т** = on Friday.',
+      vocab: [
+        { id: 'davaa', mn: 'Даваа', ro: 'Davaa', en: 'Monday' },
+        { id: 'myagmar', mn: 'Мягмар', ro: 'Myagmar', en: 'Tuesday' },
+        { id: 'lhagva', mn: 'Лхагва', ro: 'Lkhagva', en: 'Wednesday' },
+        { id: 'purev', mn: 'Пүрэв', ro: 'Pürev', en: 'Thursday' },
+        { id: 'baasan', mn: 'Баасан', ro: 'Baasan', en: 'Friday' },
+        { id: 'byamba', mn: 'Бямба', ro: 'Byamba', en: 'Saturday' },
+        { id: 'nyam', mn: 'Ням', ro: 'Nyam', en: 'Sunday' },
+        { id: 'garag', mn: 'гараг', ro: 'garag', en: 'day of the week', alt: ['weekday'] },
+        { id: 'doloohonog', mn: 'долоо хоног', ro: 'doloo khonog', en: 'week' },
+      ],
+      sentences: [
+        { id: 'dys1', mn: 'Өнөөдөр Даваа гараг', ro: 'Önöödör Davaa garag', en: 'Today is Monday', altEn: ['It is Monday today'] },
+        { id: 'dys2', mn: 'Маргааш Бямба гараг', ro: 'Margaash Byamba garag', en: 'Tomorrow is Saturday', altEn: ['It is Saturday tomorrow'] },
+        { id: 'dys3', mn: 'Би Баасан гарагт явна', ro: 'Bi Baasan garagt yavna', en: 'I will go on Friday', altEn: ['I go on Friday', 'On Friday I will go'] },
+        { id: 'dys4', mn: 'Ням гарагт би гэртээ байна', ro: 'Nyam garagt bi gertee baina', en: 'On Sunday I am at home', altEn: ['I am at home on Sunday'] },
+        { id: 'dys5', mn: 'Өчигдөр Пүрэв гараг байсан', ro: 'Öchigdör Pürev garag baisan', en: 'Yesterday was Thursday', altEn: ['It was Thursday yesterday'] },
+      ],
+    },
+    {
+      id: 'shopping',
+      title: 'Shopping',
+      icon: '🛒',
+      tips:
+        '**авах** = to take/buy — the everyday word for buying: "Би алим авна" = "I will buy apples".\n\n**үнэтэй** = expensive (literally "with price"), **хямд** = cheap.\n\nBargaining is normal at markets like Наран Туул in Ulaanbaatar!',
+      vocab: [
+        { id: 'avakh', mn: 'авах', ro: 'avakh', en: 'to buy', alt: ['buy', 'to take', 'take'] },
+        { id: 'zarakh', mn: 'зарах', ro: 'zarakh', en: 'to sell', alt: ['sell'] },
+        { id: 'unetei', mn: 'үнэтэй', ro: 'ünetei', en: 'expensive' },
+        { id: 'khyamd', mn: 'хямд', ro: 'khyamd', en: 'cheap' },
+        { id: 'zakh', mn: 'зах', ro: 'zakh', en: 'market', alt: ['bazaar'] },
+        { id: 'khudaldagch', mn: 'худалдагч', ro: 'khudaldagch', en: 'seller', alt: ['shopkeeper', 'salesperson'] },
+        { id: 'songokh', mn: 'сонгох', ro: 'songokh', en: 'to choose', alt: ['choose', 'to select'] },
+      ],
+      sentences: [
+        { id: 'shs1', mn: 'Би алим авна', ro: 'Bi alim avna', en: 'I will buy apples', altEn: ['I will buy an apple', 'I buy apples'] },
+        { id: 'shs2', mn: 'Энэ их үнэтэй байна', ro: 'Ene ikh ünetei baina', en: 'This is very expensive', altEn: ['It is very expensive'] },
+        { id: 'shs3', mn: 'Хямд байна', ro: 'Khyamd baina', en: 'It is cheap', altEn: ['This is cheap', 'Cheap'] },
+        { id: 'shs4', mn: 'Та юу авах вэ?', ro: 'Ta yuu avakh ve?', en: 'What will you buy?', altEn: ['What do you want to buy', 'What are you buying'] },
+        { id: 'shs5', mn: 'Би захад явна', ro: 'Bi zakhad yavna', en: 'I will go to the market', altEn: ['I go to the market'] },
+        { id: 'shs6', mn: 'Ээж талх авсан', ro: 'Eej talkh avsan', en: 'Mother bought bread', altEn: ['Mom bought bread'] },
+      ],
+      replies: [
+        { id: 'shr1', qMn: 'Та юу авах вэ?', qRo: 'Ta yuu avakh ve?', qEn: 'What will you buy?', aMn: 'Би алим авна', aRo: 'Bi alim avna', aEn: 'I will buy apples', wrong: ['Өнөөдөр Даваа гараг', 'Би ядарч байна'] },
+        { id: 'shr2', qMn: 'Үнэ хэд вэ?', qRo: 'Üne khed ve?', qEn: 'What is the price?', aMn: 'Мянган төгрөг', aRo: 'Myangan tögrög', aEn: 'One thousand tögrög', wrong: ['Баяртай', 'Тэр миний дүү'] },
+      ],
+    },
+    {
+      id: 'directions',
+      title: 'Directions',
+      icon: '🧭',
+      tips:
+        '**зүүн** = left (also east), **баруун** = right (also west) — Mongolians traditionally orient facing south, so east is on the left!\n\n**эргэх** = to turn: "Баруун тийш эргэ" = "Turn right". **тийш** = towards.\n\n**чигээрээ** = straight ahead.',
+      vocab: [
+        { id: 'zuun_left', mn: 'зүүн', ro: 'züün', en: 'left', alt: ['east'] },
+        { id: 'baruun', mn: 'баруун', ro: 'baruun', en: 'right', alt: ['west'] },
+        { id: 'chigeeree', mn: 'чигээрээ', ro: 'chigeeree', en: 'straight ahead', alt: ['straight'] },
+        { id: 'ergekh', mn: 'эргэх', ro: 'ergekh', en: 'to turn', alt: ['turn'] },
+        { id: 'oirkhon', mn: 'ойрхон', ro: 'oirkhon', en: 'near', alt: ['close', 'nearby'] },
+        { id: 'khol_far', mn: 'хол', ro: 'khol', en: 'far', alt: ['far away'] },
+        { id: 'tiish', mn: 'тийш', ro: 'tiish', en: 'towards', alt: ['in the direction of'] },
+        { id: 'zam', mn: 'зам', ro: 'zam', en: 'road', alt: ['way', 'path'] },
+      ],
+      sentences: [
+        { id: 'dis1', mn: 'Баруун тийш эргэ', ro: 'Baruun tiish erge', en: 'Turn right', altEn: ['Turn to the right'] },
+        { id: 'dis2', mn: 'Зүүн тийш эргэ', ro: 'Züün tiish erge', en: 'Turn left', altEn: ['Turn to the left'] },
+        { id: 'dis3', mn: 'Чигээрээ яв', ro: 'Chigeeree yav', en: 'Go straight ahead', altEn: ['Go straight'] },
+        { id: 'dis4', mn: 'Дэлгүүр ойрхон байна', ro: 'Delgüür oirkhon baina', en: 'The shop is near', altEn: ['The store is close', 'The shop is nearby'] },
+        { id: 'dis5', mn: 'Сургууль хол байна', ro: 'Surguuli khol baina', en: 'The school is far', altEn: ['The school is far away'] },
+        { id: 'dis6', mn: 'Энэ зам хаашаа явдаг вэ?', ro: 'Ene zam khaashaa yavdag ve?', en: 'Where does this road go?', altEn: ['Where does this road lead'] },
+      ],
+    },
+    {
+      id: 'feelings',
+      title: 'Feelings',
+      icon: '😊',
+      tips:
+        'Feelings usually use the continuous **-ж байна**: "Би өлсөж байна" = "I am (getting) hungry".\n\n**өлсөх** = to be hungry, **цангах** = to be thirsty, **ядрах** = to be tired.\n\n**өвчтэй** = sick (literally "with illness").',
+      vocab: [
+        { id: 'azjargaltai', mn: 'аз жаргалтай', ro: 'az jargaltai', en: 'happy' },
+        { id: 'guniigtai', mn: 'гунигтай', ro: 'gunigtai', en: 'sad' },
+        { id: 'yadarsan', mn: 'ядарсан', ro: 'yadarsan', en: 'tired' },
+        { id: 'olsokh', mn: 'өлсөх', ro: 'ölsökh', en: 'to be hungry', alt: ['hungry', 'to get hungry'] },
+        { id: 'tsangakh', mn: 'цангах', ro: 'tsangakh', en: 'to be thirsty', alt: ['thirsty', 'to get thirsty'] },
+        { id: 'ovchtei', mn: 'өвчтэй', ro: 'övchtei', en: 'sick', alt: ['ill'] },
+        { id: 'eruul', mn: 'эрүүл', ro: 'erüül', en: 'healthy' },
+        { id: 'ayakhgui', mn: 'айж байна', ro: 'aij baina', en: 'is scared', alt: ['is afraid', 'scared'] },
+      ],
+      sentences: [
+        { id: 'fes1', mn: 'Би өлсөж байна', ro: 'Bi ölsöj baina', en: 'I am hungry', altEn: ['I am getting hungry'] },
+        { id: 'fes2', mn: 'Би ядарч байна', ro: 'Bi yadarch baina', en: 'I am tired', altEn: ['I am getting tired'] },
+        { id: 'fes3', mn: 'Чи цангаж байна уу?', ro: 'Chi tsangaj baina uu?', en: 'Are you thirsty?', altEn: ['Are you getting thirsty'] },
+        { id: 'fes4', mn: 'Тэр өвчтэй байна', ro: 'Ter övchtei baina', en: 'He is sick', altEn: ['She is sick', 'He is ill'] },
+        { id: 'fes5', mn: 'Би их аз жаргалтай байна', ro: 'Bi ikh az jargaltai baina', en: 'I am very happy', altEn: ['I am so happy'] },
+        { id: 'fes6', mn: 'Миний дүү гунигтай байна', ro: 'Minii düü gunigtai baina', en: 'My younger sibling is sad', altEn: ['My little brother is sad', 'My little sister is sad'] },
+      ],
+    },
+    {
+      id: 'professions',
+      title: 'Professions',
+      icon: '🧑‍⚕️',
+      tips:
+        '**ажил** = work/job, **ажиллах** = to work.\n\nMany professions end in **-ч/-чин** (doer): жолоо**ч** = driver, мал**чин** = herder, тогоо**ч** = cook.\n\nAbout a quarter of Mongolians are herders — **малчин** comes from мал (livestock).',
+      vocab: [
+        { id: 'emch', emoji: '🧑‍⚕️', mn: 'эмч', ro: 'emch', en: 'doctor' },
+        { id: 'jolooch', emoji: '🧑‍✈️', mn: 'жолооч', ro: 'jolooch', en: 'driver' },
+        { id: 'togooch', emoji: '🧑‍🍳', mn: 'тогооч', ro: 'togooch', en: 'cook', alt: ['chef'] },
+        { id: 'malchin', emoji: '🧑‍🌾', mn: 'малчин', ro: 'malchin', en: 'herder', alt: ['herdsman'] },
+        { id: 'tsagdaa', emoji: '👮', mn: 'цагдаа', ro: 'tsagdaa', en: 'police officer', alt: ['police', 'policeman'] },
+        { id: 'ajil', mn: 'ажил', ro: 'ajil', en: 'work', alt: ['job'] },
+        { id: 'ajillakh', mn: 'ажиллах', ro: 'ajillakh', en: 'to work', alt: ['work (verb)'] },
+        { id: 'duuch', emoji: '🧑‍🎤', mn: 'дуучин', ro: 'duuchin', en: 'singer' },
+      ],
+      sentences: [
+        { id: 'prs1x', mn: 'Миний ээж эмч', ro: 'Minii eej emch', en: 'My mother is a doctor', altEn: ['My mom is a doctor'] },
+        { id: 'prs2x', mn: 'Аав ажилдаа явсан', ro: 'Aav ajildaa yavsan', en: 'Father went to work', altEn: ['Dad went to work', 'Father went to his work'] },
+        { id: 'prs3x', mn: 'Тэр малчин', ro: 'Ter malchin', en: 'He is a herder', altEn: ['She is a herder', 'That person is a herder'] },
+        { id: 'prs4x', mn: 'Миний ах жолооч', ro: 'Minii akh jolooch', en: 'My older brother is a driver', altEn: ['My brother is a driver'] },
+        { id: 'prs5x', mn: 'Би эмнэлэгт ажилладаг', ro: 'Bi emnelegt ajilladag', en: 'I work at a hospital', altEn: ['I work in a hospital'] },
+        { id: 'prs6x', mn: 'Тогооч бууз хийж байна', ro: 'Togooch buuz khiij baina', en: 'The cook is making buuz', altEn: ['The chef is making dumplings', 'The cook is making dumplings'] },
+      ],
+    },
+  ],
+};

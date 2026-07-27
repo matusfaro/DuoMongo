@@ -5,9 +5,10 @@ import { getSkillProgress, useAppState } from '../lib/store';
 
 interface Props {
   onStartLesson: (skill: Skill) => void;
+  onOpenStories: () => void;
 }
 
-export function PathScreen({ onStartLesson }: Props) {
+export function PathScreen({ onStartLesson, onOpenStories }: Props) {
   const app = useAppState();
   const [openSkill, setOpenSkill] = useState<Skill | null>(null);
   const [showTips, setShowTips] = useState(false);
@@ -17,6 +18,14 @@ export function PathScreen({ onStartLesson }: Props) {
 
   return (
     <div className="path">
+      <button className="stories-banner" onClick={onOpenStories}>
+        <span className="stories-banner-icon">📚</span>
+        <span className="stories-banner-text">
+          <b>Stories</b>
+          <span>Dialogues with audio — learn in context</span>
+        </span>
+        <span className="stories-banner-arrow">›</span>
+      </button>
       {sections.map((sec) => (
         <div key={sec.id} className="section">
           <div className="section-header" style={{ background: sec.color }}>
