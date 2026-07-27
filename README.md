@@ -14,15 +14,17 @@ Android app.
   per skill.
 - **Exercise types**: multiple choice (both directions), word-bank sentence
   translation (both directions), matching pairs, typed translation, and
-  listening comprehension (uses the device's text-to-speech).
+  listening comprehension.
 - **Crown levels**: each skill has 5 levels × 3 lessons; higher levels serve
-  harder exercise types. Skills unlock sequentially.
+  harder exercise types. All skills are open from the start.
 - **Spaced repetition**: every word/sentence is tracked with an SM-2-style
   scheduler; the Practice tab reviews due or weakest items.
 - **Gamification**: XP with a configurable daily goal, streak with streak
   freezes, gems, hearts (optional), combo bonuses, 16 achievements.
 - **Stats**: weekly XP chart, 12-week activity heatmap, accuracy, time spent,
   words learned, best streak.
+- **Audio**: bundled real-Mongolian clips (mn-MN neural voice) for every
+  word and sentence, generated at build time; fully offline at runtime.
 - **Reminders**: daily lesson notification at a configurable time plus an
   evening streak-saver nudge (Capacitor local notifications).
 
