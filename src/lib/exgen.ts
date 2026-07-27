@@ -30,19 +30,44 @@ function tokenize(s: string): string[] {
 
 // ---- distractor pools ----
 
+/** All accepted English translations of an item, lowercased. */
+function acceptedEn(v: VocabItem): Set<string> {
+  return new Set([v.en, ...(v.alt ?? [])].map((s) => s.toLowerCase()));
+}
+
+/** True if the two items could translate each other (shared meaning) — never valid as mutual distractors. */
+function meaningsOverlap(a: VocabItem, b: VocabItem): boolean {
+  if (a.mn === b.mn) return true;
+  const ae = acceptedEn(a);
+  for (const e of acceptedEn(b)) if (ae.has(e)) return true;
+  return false;
+}
+
 function vocabDistractors(skill: Skill, item: VocabItem, field: 'mn' | 'en', n: number): string[] {
   const local = skill.vocab.filter((v) => v.id !== item.id);
-  const global = allVocab.filter((v) => v.en !== item.en && v.mn !== item.mn);
+  const global = allVocab;
   const pool = [...pick(local, n), ...pick(global, n * 2)];
   const seen = new Set<string>([item[field]]);
   const out: string[] = [];
   for (const p of pool) {
+    // exclude any candidate whose option text would also be a correct answer
+    if (meaningsOverlap(p, item)) continue;
     const val = p[field];
     if (!seen.has(val)) {
       seen.add(val);
       out.push(val);
       if (out.length >= n) break;
     }
+  }
+  return out;
+}
+
+/** Filter a vocab list so no two entries share a translation (keeps match pairs unambiguous). */
+function unambiguousSubset(items: VocabItem[]): VocabItem[] {
+  const out: VocabItem[] = [];
+  for (const v of items) {
+    if (out.some((o) => meaningsOverlap(o, v))) continue;
+    out.push(v);
   }
   return out;
 }
@@ -197,8 +222,9 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
   }
 
   // One matching exercise per lesson if enough vocab
-  if (skill.vocab.length >= 4) {
-    exercises.splice(Math.min(4, exercises.length), 0, matchFromVocab(skill, pick(skill.vocab, Math.min(5, skill.vocab.length))));
+  const matchable = unambiguousSubset(shuffle(skill.vocab));
+  if (matchable.length >= 4) {
+    exercises.splice(Math.min(4, exercises.length), 0, matchFromVocab(skill, matchable.slice(0, 5)));
   }
 
   return shuffle(exercises).slice(0, 14);
@@ -235,9 +261,10 @@ export function generatePractice(itemKeys: string[]): Exercise[] {
     }
   }
 
-  if (matchPool.length >= 3) {
+  const cleanPool = unambiguousSubset(matchPool);
+  if (cleanPool.length >= 3) {
     const skill = skillById.get(matchSkillId) ?? allSkills[0];
-    exercises.push(matchFromVocab(skill, matchPool.slice(0, 5)));
+    exercises.push(matchFromVocab(skill, cleanPool.slice(0, 5)));
   } else if (matchPool.length > 0) {
     for (const item of matchPool) {
       const entry = [...vocabByKey.entries()].find(([, v]) => v.item.id === item.id);

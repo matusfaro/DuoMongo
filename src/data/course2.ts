@@ -68,7 +68,7 @@ export const section3: Section = {
       title: 'Adjectives',
       icon: '✨',
       tips:
-        'Adjectives come before nouns and never change form: том гэр (a big home), том гэрүүд (big homes).\n\nAs predicates they stand alone: "Энэ гэр том" = "This home is big" — no verb needed.\n\n**их** = very/much: их том = very big.',
+        'Adjectives come before nouns and never change form: том гэр (a big home), том гэрүүд (big homes).\n\nAs predicates they stand alone: "Энэ гэр том" = "This home is big" — no verb needed.\n\n**их** = very/much: их том = very big.\n\n**хуучин** = old for things; for people and animals use **хөгшин**.',
       vocab: [
         { id: 'tom', mn: 'том', ro: 'tom', en: 'big', alt: ['large'] },
         { id: 'jijig', mn: 'жижиг', ro: 'jijig', en: 'small', alt: ['little'] },
@@ -133,6 +133,9 @@ export const section3: Section = {
         { id: 'uul_cloud', mn: 'үүл', ro: 'üül', en: 'cloud' },
         { id: 'tenger', mn: 'тэнгэр', ro: 'tenger', en: 'sky' },
         { id: 'orokh', mn: 'орох', ro: 'orokh', en: 'to fall (rain/snow)', alt: ['to enter', 'to fall'] },
+        { id: 'zun', mn: 'зун', ro: 'zun', en: 'summer' },
+        { id: 'ovol', mn: 'өвөл', ro: 'övöl', en: 'winter' },
+        { id: 'khuchtei', mn: 'хүчтэй', ro: 'khüchtei', en: 'strong', alt: ['powerful'] },
       ],
       sentences: [
         { id: 'wes1', mn: 'Бороо орж байна', ro: 'Boroo orj baina', en: 'It is raining', altEn: ['It rains', 'Rain is falling'] },
@@ -141,6 +144,7 @@ export const section3: Section = {
         { id: 'wes4', mn: 'Нар гарч байна', ro: 'Nar garch baina', en: 'The sun is coming out', altEn: ['The sun is rising', 'The sun is out'] },
         { id: 'wes5', mn: 'Салхи хүчтэй байна', ro: 'Salkhi khüchtei baina', en: 'The wind is strong', altEn: ['It is windy'] },
         { id: 'wes6', mn: 'Тэнгэр хөх байна', ro: 'Tenger khökh baina', en: 'The sky is blue', altEn: ['Sky is blue'] },
+        { id: 'wes7', mn: 'Зун халуун, өвөл хүйтэн', ro: 'Zun khaluun, övöl khüiten', en: 'Summer is hot, winter is cold', altEn: ['Summer is hot and winter is cold', 'In summer it is hot in winter it is cold'] },
       ],
     },
   ],
@@ -168,6 +172,7 @@ export const section4: Section = {
         { id: 'shud', mn: 'шүд', ro: 'shüd', en: 'tooth', alt: ['teeth'] },
         { id: 'us_hair', mn: 'үс', ro: 'üs', en: 'hair' },
         { id: 'ovdokh', mn: 'өвдөх', ro: 'övdökh', en: 'to hurt', alt: ['to ache', 'hurt'] },
+        { id: 'ugaakh', mn: 'угаах', ro: 'ugaakh', en: 'to wash', alt: ['wash'] },
       ],
       sentences: [
         { id: 'bos1', mn: 'Миний толгой өвдөж байна', ro: 'Minii tolgoi övdöj baina', en: 'My head hurts', altEn: ['My head is hurting', 'My head aches'] },
@@ -209,7 +214,7 @@ export const section4: Section = {
       title: 'Verbs 2',
       icon: '⏳',
       tips:
-        'Past tense **-сан/-сэн/-сон/-сөн**: Би яв**сан** = I went. Ирсэн = came.\n\nFuture/habitual **-на/-нэ/-но/-нө**: Би явна = I will go.\n\nHabitual **-даг/-дэг**: Би цай уу**даг** = I (usually) drink tea.',
+        'Past tense **-сан/-сэн/-сон/-сөн**: Би яв**сан** = I went. Ирсэн = came.\n\nFuture/habitual **-на/-нэ/-но/-нө**: Би явна = I will go.\n\nHabitual **-даг/-дэг**: Би цай уу**даг** = I (usually) drink tea.\n\nThe suffix vowel follows **vowel harmony** — it matches the vowels of the word: яв**на**, ир**нэ**, ор**но**, өмсө**нө**.',
       vocab: [
         { id: 'yavsan', mn: 'явсан', ro: 'yavsan', en: 'went' },
         { id: 'irsen', mn: 'ирсэн', ro: 'irsen', en: 'came' },
@@ -246,7 +251,7 @@ export const section4: Section = {
         { id: 'tuslaach', mn: 'туслаач', ro: 'tuslaach', en: 'please help', alt: ['help', 'help me'] },
         { id: 'khedvetei', mn: 'ямар үнэтэй', ro: 'yamar ünetei', en: 'how much (price)', alt: ['what price', 'how expensive'] },
         { id: 'dakhiad', mn: 'дахиад', ro: 'dakhiad', en: 'again', alt: ['once more'] },
-        { id: 'margaashuulzii', mn: 'уулзая', ro: 'uulzaya', en: "let's meet", alt: ['lets meet', 'see you'] },
+        { id: 'margaashuulzii', mn: 'уулзъя', ro: 'uulzya', en: "let's meet", alt: ['lets meet', 'see you'] },
       ],
       sentences: [
         { id: 'phs1', mn: 'Намайг Бат гэдэг', ro: 'Namaig Bat gedeg', en: 'My name is Bat', altEn: ['I am called Bat', 'I am Bat'] },
@@ -255,7 +260,8 @@ export const section4: Section = {
         { id: 'phs4', mn: 'Би монголоор жаахан ярьдаг', ro: 'Bi mongoloor jaakhan yaridag', en: 'I speak a little Mongolian', altEn: ['I speak a bit of Mongolian', 'I speak little Mongolian'] },
         { id: 'phs5', mn: 'Энэ ямар үнэтэй вэ?', ro: 'Ene yamar ünetei ve?', en: 'How much is this?', altEn: ['How much does this cost', 'What price is this'] },
         { id: 'phs6', mn: 'Дахиад хэлээрэй', ro: 'Dakhiad kheleerei', en: 'Please say it again', altEn: ['Say it again', 'Please repeat'] },
-        { id: 'phs7', mn: 'Маргааш уулзая', ro: 'Margaash uulzaya', en: "Let's meet tomorrow", altEn: ['Lets meet tomorrow', 'See you tomorrow'] },
+        { id: 'phs7', mn: 'Маргааш уулзъя', ro: 'Margaash uulzya', en: "Let's meet tomorrow", altEn: ['Lets meet tomorrow', 'See you tomorrow'] },
+        { id: 'phs8', mn: 'Би Монголд дуртай', ro: 'Bi Mongold durtai', en: 'I love Mongolia', altEn: ['I like Mongolia'] },
       ],
     },
   ],

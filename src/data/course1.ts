@@ -31,6 +31,7 @@ export const section1: Section = {
         { id: 'b1s3', mn: 'Би Монгол хүн', ro: 'Bi Mongol khün', en: 'I am Mongolian', altEn: ['I am a Mongolian person', 'I am a Mongolian'] },
         { id: 'b1s4', mn: 'Тийм, энэ ном', ro: 'Tiim, ene nom', en: 'Yes, this is a book', altEn: ['Yes this is a book'] },
         { id: 'b1s5', mn: 'Үгүй, тэр хүн', ro: 'Ügüi, ter khün', en: 'No, that is a person', altEn: ['No that is a person'] },
+        { id: 'b1s6', mn: 'Чи Монгол хүн үү?', ro: 'Chi Mongol khün üü?', en: 'Are you Mongolian?', altEn: ['Are you a Mongolian person', 'Are you a Mongolian'] },
       ],
     },
     {
@@ -56,6 +57,8 @@ export const section1: Section = {
         { id: 'grs4', mn: 'Баярлалаа, баяртай', ro: 'Bayarlalaa, bayartai', en: 'Thank you, goodbye', altEn: ['Thanks, bye', 'Thank you goodbye'] },
         { id: 'grs5', mn: 'Уучлаарай, зүгээр зүгээр', ro: 'Uuchlaarai, zügeer zügeer', en: 'Sorry — no problem', altEn: ['Sorry, it is okay', 'Sorry no problem'] },
         { id: 'grs6', mn: 'Чи сайн уу?', ro: 'Chi sain uu?', en: 'Hi, how are you?', altEn: ['Are you good', 'Hi are you well', 'How are you'] },
+        { id: 'grs7', mn: 'Өглөөний мэнд', ro: 'Öglöönii mend', en: 'Good morning', altEn: ['Morning greetings'] },
+        { id: 'grs8', mn: 'Оройн мэнд', ro: 'Oroin mend', en: 'Good evening', altEn: ['Evening greetings'] },
       ],
     },
     {
@@ -119,7 +122,7 @@ export const section1: Section = {
       title: 'Numbers',
       icon: '🔢',
       tips:
-        'Numbers 1–10: нэг, хоёр, гурав, дөрөв, тав, зургаа, долоо, найм, ес, арав.\n\nBefore a noun, some numbers use a short form: хоёр ном (two books) — nouns stay singular after numbers.\n\n**хэд** = how many: "Энэ хэд вэ?" = "How much is this?"',
+        'Numbers 1–10: нэг, хоёр, гурав, дөрөв, тав, зургаа, долоо, найм, ес, арав.\n\nBefore a noun, гурав, дөрөв and арав take **-н**: гурва**н** ном (three books), арва**н** хүн (ten people). хоёр stays the same: хоёр ном. Nouns stay singular after numbers.\n\n**хэд** = how many: "Энэ хэд вэ?" = "How much is this?"',
       vocab: [
         { id: 'neg', mn: 'нэг', ro: 'neg', en: 'one', alt: ['1'] },
         { id: 'khoyor', mn: 'хоёр', ro: 'khoyor', en: 'two', alt: ['2'] },
@@ -141,6 +144,7 @@ export const section1: Section = {
         { id: 'nus4', mn: 'Тав, зургаа, долоо', ro: 'Tav, zurgaa, doloo', en: 'Five, six, seven', altEn: ['Five six seven', '5 6 7'] },
         { id: 'nus5', mn: 'Арван хүн', ro: 'Arvan khün', en: 'Ten people', altEn: ['Ten persons', 'Ten person'] },
         { id: 'nus6', mn: 'Найм, ес, арав', ro: 'Naim, yes, arav', en: 'Eight, nine, ten', altEn: ['Eight nine ten', '8 9 10'] },
+        { id: 'nus7', mn: 'Гурван ном', ro: 'Gurvan nom', en: 'Three books', altEn: ['Three book'] },
       ],
     },
   ],
@@ -166,6 +170,7 @@ export const section2: Section = {
         { id: 'budaa', mn: 'будаа', ro: 'budaa', en: 'rice' },
         { id: 'buuz', mn: 'бууз', ro: 'buuz', en: 'dumpling', alt: ['buuz', 'dumplings'] },
         { id: 'alim', mn: 'алим', ro: 'alim', en: 'apple' },
+        { id: 'khuushuur', mn: 'хуушуур', ro: 'khuushuur', en: 'khuushuur', alt: ['fried pastry', 'fried meat pastry'] },
         { id: 'idekh', mn: 'идэх', ro: 'idekh', en: 'to eat', alt: ['eat'] },
         { id: 'uukh', mn: 'уух', ro: 'uukh', en: 'to drink', alt: ['drink'] },
         { id: 'amttai', mn: 'амттай', ro: 'amttai', en: 'tasty', alt: ['delicious'] },
@@ -179,6 +184,7 @@ export const section2: Section = {
         { id: 'fos5', mn: 'Ээж талх иднэ', ro: 'Eej talkh idne', en: 'Mother eats bread', altEn: ['Mom eats bread', 'Mother will eat bread'] },
         { id: 'fos6', mn: 'Та сүү уух уу?', ro: 'Ta süü uukh uu?', en: 'Will you drink milk?', altEn: ['Do you drink milk', 'Would you like to drink milk'] },
         { id: 'fos7', mn: 'Миний аав мах иднэ', ro: 'Minii aav makh idne', en: 'My father eats meat', altEn: ['My dad eats meat'] },
+        { id: 'fos8', mn: 'Хуушуур их амттай', ro: 'Khuushuur ikh amttai', en: 'Khuushuur is very tasty', altEn: ['Khuushuur is very delicious', 'The khuushuur is very tasty'] },
       ],
     },
     {
@@ -234,7 +240,8 @@ export const section2: Section = {
         { id: 'ans4', mn: 'Хонь ус ууна', ro: 'Khoni us uuna', en: 'The sheep drinks water', altEn: ['A sheep drinks water', 'Sheep drink water'] },
         { id: 'ans5', mn: 'Тэмээ том амьтан', ro: 'Temee tom amitan', en: 'The camel is a big animal', altEn: ['A camel is a big animal', 'Camels are big animals'] },
         { id: 'ans6', mn: 'Чоно мах иднэ', ro: 'Chono makh idne', en: 'The wolf eats meat', altEn: ['Wolves eat meat', 'A wolf eats meat'] },
-        { id: 'ans7', mn: 'Шувуу ном уншихгүй', ro: 'Shuvuu nom unshikhgüi', en: 'Birds do not read books', altEn: ['A bird does not read books', 'The bird does not read a book'] },
+        { id: 'ans7', mn: 'Шувуу ном уншдаггүй', ro: 'Shuvuu nom unshdaggüi', en: 'Birds do not read books', altEn: ['A bird does not read books', 'The bird does not read a book'] },
+        { id: 'ans8', mn: 'Тэр нохой том', ro: 'Ter nokhoi tom', en: 'That dog is big', altEn: ['That dog is large'] },
       ],
     },
     {
@@ -249,7 +256,7 @@ export const section2: Section = {
         { id: 'yagaad', mn: 'яагаад', ro: 'yagaad', en: 'why' },
         { id: 'yamar', mn: 'ямар', ro: 'yamar', en: 'what kind of', alt: ['which', 'what kind'] },
         { id: 'yaj', mn: 'яаж', ro: 'yaaj', en: 'how' },
-        { id: 'geje', mn: 'гэж', ro: 'gej', en: 'called', alt: ['that (quote)'] },
+        { id: 'ali', mn: 'аль', ro: 'ali', en: 'which' },
         { id: 'ner', mn: 'нэр', ro: 'ner', en: 'name' },
         { id: 'yavakh', mn: 'явах', ro: 'yavakh', en: 'to go', alt: ['go'] },
       ],

@@ -10,7 +10,7 @@ Android app.
 - **Course**: 19 skills across 4 sections (Basics, Greetings, Family, Numbers,
   Food, Colors, Animals, Questions, Verbs, Time, Places, Adjectives,
   Pronouns & Cases, Weather, Body, Clothes, Past/Future tense, Travel Phrases)
-  with ~190 vocabulary items, ~120 sentences, romanization, and grammar tips
+  with ~195 vocabulary items, ~130 sentences, romanization, and grammar tips
   per skill.
 - **Exercise types**: multiple choice (both directions), word-bank sentence
   translation (both directions), matching pairs, typed translation, and
