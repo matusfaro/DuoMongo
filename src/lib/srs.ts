@@ -25,7 +25,13 @@ export function reviewItem(key: string, correct: boolean) {
       card.ease = Math.max(1.3, card.ease - 0.2);
     }
     card.due = Date.now() + Math.max(0.5, card.intervalDays) * DAY * (correct ? 1 : 0.02);
-    return { ...s, srs: { ...s.srs, [key]: card } };
+    // answering a flagged item correctly clears the flag (its SRS schedule takes over)
+    let flagged = s.flagged;
+    if (correct && flagged[key]) {
+      flagged = { ...flagged };
+      delete flagged[key];
+    }
+    return { ...s, srs: { ...s.srs, [key]: card }, flagged };
   });
 }
 
@@ -49,6 +55,28 @@ export function weakestItems(s: AppState, limit: number): string[] {
     .sort((a, b) => a[1].ease - b[1].ease || a[1].due - b[1].due)
     .map(([k]) => k)
     .slice(0, limit);
+}
+
+/** 0 = due/weak, 1 = fresh, 2 = good, 3 = strong. */
+export function strengthOf(card: SrsCard | undefined): number {
+  if (!card || card.due <= Date.now()) return 0;
+  return card.intervalDays >= 7 ? 3 : card.intervalDays >= 3 ? 2 : 1;
+}
+
+/** Manually mark an item as known: strong card, not due for a week, flag cleared. */
+export function markKnown(key: string) {
+  setState((s) => {
+    const flagged = { ...s.flagged };
+    delete flagged[key];
+    return {
+      ...s,
+      flagged,
+      srs: {
+        ...s.srs,
+        [key]: { ease: 2.8, intervalDays: 7, due: Date.now() + 7 * DAY, reps: 3, lapses: s.srs[key]?.lapses ?? 0 },
+      },
+    };
+  });
 }
 
 export function wordsLearnedCount(s: AppState): number {

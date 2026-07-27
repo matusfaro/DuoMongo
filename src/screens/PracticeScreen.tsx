@@ -1,6 +1,7 @@
-import { useAppState } from '../lib/store';
+import { toggleFlag, useAppState } from '../lib/store';
 import { dueCount, wordsLearnedCount } from '../lib/srs';
-import { vocabByKey } from '../data/course';
+import { sentenceByKey, vocabByKey } from '../data/course';
+import { speak } from '../lib/audio';
 
 interface Props {
   onStartPractice: () => void;
@@ -35,6 +36,35 @@ export function PracticeScreen({ onStartPractice }: Props) {
           {due > 0 ? `REVIEW ${Math.min(due, 12)} ITEMS +10 XP` : 'PRACTICE WEAK WORDS +10 XP'}
         </button>
       </div>
+
+      {Object.keys(app.flagged).length > 0 && (
+        <div className="word-list flagged-list">
+          <h3>🚩 Special attention ({Object.keys(app.flagged).length})</h3>
+          <p className="flagged-note">These come first in every practice session. A flag clears itself once you answer the item correctly — or remove it here.</p>
+          {Object.keys(app.flagged).map((key) => {
+            const v = vocabByKey.get(key)?.item;
+            const s = sentenceByKey.get(key)?.item;
+            const mn = v?.mn ?? s?.mn;
+            const ro = v?.ro ?? s?.ro;
+            const en = v?.en ?? s?.en;
+            if (!mn) return null;
+            return (
+              <div key={key} className="word-row">
+                <div onClick={() => speak(mn)}>
+                  <div className="word-mn">🔊 {mn}</div>
+                  <div className="word-en">
+                    {app.settings.showRomanization ? `${ro} · ` : ''}
+                    {en}
+                  </div>
+                </div>
+                <button className="btn-small btn-danger" onClick={() => toggleFlag(key)}>
+                  REMOVE
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {wordRows.length > 0 && (
         <div className="word-list">

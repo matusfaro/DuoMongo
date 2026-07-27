@@ -181,6 +181,7 @@ export interface AppState {
   perfectLessons: number;
   practiceSessions: number;
   storiesDone: Record<string, number>; // story id -> completions
+  flagged: Record<string, number>; // item key -> flagged-at timestamp (wants extra practice)
   totalAnswers: number;
   correctAnswers: number;
   timeSpentMs: number;

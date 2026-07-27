@@ -25,6 +25,7 @@ function defaultState(): AppState {
     perfectLessons: 0,
     practiceSessions: 0,
     storiesDone: {},
+    flagged: {},
     totalAnswers: 0,
     correctAnswers: 0,
     timeSpentMs: 0,
@@ -190,6 +191,30 @@ export function advanceSkill(skillId: string, lessonsPerLevel: number, maxCrowns
       lessonsDone = 0;
     }
     return { ...s, skills: { ...s.skills, [skillId]: { crowns, lessonsDone } } };
+  });
+}
+
+/** Toggle the practice flag on an item. Flagging resets its SRS card so it comes up immediately. */
+export function toggleFlag(key: string) {
+  setState((s) => {
+    const flagged = { ...s.flagged };
+    if (flagged[key]) {
+      delete flagged[key];
+      return { ...s, flagged };
+    }
+    flagged[key] = Date.now();
+    const card = s.srs[key];
+    const srs = {
+      ...s.srs,
+      [key]: {
+        ease: Math.max(1.3, (card?.ease ?? 2.5) - 0.3),
+        intervalDays: 0,
+        due: Date.now(),
+        reps: 0,
+        lapses: card?.lapses ?? 0,
+      },
+    };
+    return { ...s, flagged, srs };
   });
 }
 

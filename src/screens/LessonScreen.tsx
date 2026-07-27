@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { BankExercise, ChoiceExercise, Exercise, MatchExercise, ShadowExercise, TypeExercise } from '../types';
 import { BankEx, bankAnswerText, checkBank, ChoiceEx, checkType, MatchEx, ShadowEx, TypeEx } from '../components/exercises';
 import { playComplete, playCorrect, playWrong, speak } from '../lib/audio';
-import { getState, loseHeart, useAppState } from '../lib/store';
+import { getState, loseHeart, toggleFlag, useAppState } from '../lib/store';
 import { reviewItem } from '../lib/srs';
 
 export interface LessonResult {
@@ -200,6 +200,15 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       <div className="lesson-title-row">
         <span className="lesson-name">{title}</span>
         {combo >= 3 && <span className="combo">🔥 {combo} in a row</span>}
+        {(ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) && (
+          <button
+            className={`flag-btn ${app.flagged[ex.itemKey] ? 'on' : ''}`}
+            onClick={() => toggleFlag(ex.itemKey)}
+            title="Practice this more later"
+          >
+            🚩 {app.flagged[ex.itemKey] ? 'Will practice' : 'Practice later'}
+          </button>
+        )}
       </div>
 
       <div className="lesson-body">

@@ -70,7 +70,9 @@ export default function App() {
       setNoHearts(true);
       return;
     }
-    let keys = dueItems(st, 12);
+    // flagged items come first, then due reviews, then weakest
+    const flaggedKeys = Object.keys(st.flagged).filter((k) => k.startsWith('w:') || k.startsWith('s:'));
+    let keys = [...new Set([...flaggedKeys, ...dueItems(st, 12)])].slice(0, 12);
     if (keys.length < 6) keys = [...new Set([...keys, ...weakestItems(st, 12)])].slice(0, 12);
     const exercises = generatePractice(keys);
     if (exercises.length === 0) return;
