@@ -43,6 +43,8 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
   const progress = idx / queue.length;
   const soundOn = app.settings.soundEnabled;
 
+  const advTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const resetAnswerState = () => {
     setSelected(null);
     setChosen([]);
@@ -68,6 +70,10 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
   };
 
   const advance = (wasCorrect: boolean, current: Exercise) => {
+    if (advTimer.current) {
+      clearTimeout(advTimer.current);
+      advTimer.current = null;
+    }
     if (!wasCorrect) {
       // re-queue missed exercise at the end (Duolingo-style)
       setQueue((q) => [...q, current]);
@@ -80,13 +86,14 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     resetAnswerState();
   };
 
-  const submit = () => {
+  const submit = (choiceIndex?: number) => {
     if (!ex || feedback) return;
     let correct = false;
     let correctAnswer = '';
     if (ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice') {
       const c = ex as ChoiceExercise;
-      correct = selected === c.correctIndex;
+      const picked = choiceIndex ?? selected;
+      correct = picked === c.correctIndex;
       correctAnswer = c.options[c.correctIndex];
     } else if (ex.type === 'bank-mn-en' || ex.type === 'bank-en-mn') {
       const b = ex as BankExercise;
@@ -113,7 +120,10 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     // speak the Mongolian on correct answers for reinforcement
     if (correct && 'speak' in ex && ex.speak && ex.type !== 'listen-choice') speak(ex.speak);
 
-    if (!correct && getState().settings.heartsEnabled && getState().hearts <= 0) {
+    if (correct) {
+      // auto-advance — no CONTINUE tap needed when right
+      advTimer.current = setTimeout(() => advance(true, ex), 900);
+    } else if (getState().settings.heartsEnabled && getState().hearts <= 0) {
       setTimeout(() => finish(true), 1200);
     }
   };
@@ -169,19 +179,31 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
 
       <div className="lesson-body">
         {(ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice') && (
-          <ChoiceEx ex={ex as ChoiceExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} selected={selected} setSelected={setSelected} />
+          <ChoiceEx
+            ex={ex as ChoiceExercise}
+            showRo={app.settings.showRomanization}
+            locked={!!feedback}
+            selected={selected}
+            onPick={(i) => {
+              setSelected(i);
+              submit(i); // one tap: picking an option checks it immediately
+            }}
+          />
         )}
         {(ex.type === 'bank-mn-en' || ex.type === 'bank-en-mn') && (
           <BankEx ex={ex as BankExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} chosen={chosen} setChosen={setChosen} />
         )}
         {ex.type === 'type-mn-en' && (
-          <TypeEx ex={ex as TypeExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} text={typed} setText={setTyped} />
+          <TypeEx ex={ex as TypeExercise} showRo={app.settings.showRomanization} locked={!!feedback} onAnswerChange={setReady} text={typed} setText={setTyped} onEnter={() => submit()} />
         )}
         {ex.type === 'match' && <MatchEx ex={ex as MatchExercise} onComplete={matchDone} onMistake={matchMistake} />}
       </div>
 
       {ex.type !== 'match' && (
-        <div className={`lesson-footer ${feedback ? (feedback.kind === 'correct' ? 'fb-correct' : 'fb-wrong') : ''}`}>
+        <div
+          className={`lesson-footer ${feedback ? (feedback.kind === 'correct' ? 'fb-correct' : 'fb-wrong') : ''}`}
+          onClick={feedback?.kind === 'correct' ? continueNext : undefined}
+        >
           {feedback ? (
             <div className="feedback">
               <div className="feedback-text">
@@ -203,12 +225,16 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
                   </>
                 )}
               </div>
-              <button className={`btn-big ${feedback.kind === 'correct' ? 'btn-green' : 'btn-red'}`} onClick={continueNext}>
-                CONTINUE
-              </button>
+              {feedback.kind === 'wrong' && (
+                <button className="btn-big btn-red" onClick={continueNext}>
+                  CONTINUE
+                </button>
+              )}
             </div>
+          ) : ex.type === 'choice-mn-en' || ex.type === 'choice-en-mn' || ex.type === 'listen-choice' ? (
+            <div className="tap-hint">Tap an answer</div>
           ) : (
-            <button className="btn-big btn-green" disabled={!ready} onClick={submit}>
+            <button className="btn-big btn-green" disabled={!ready} onClick={() => submit()}>
               CHECK
             </button>
           )}

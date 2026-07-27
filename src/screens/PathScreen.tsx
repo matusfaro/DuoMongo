@@ -12,17 +12,8 @@ export function PathScreen({ onStartLesson }: Props) {
   const [openSkill, setOpenSkill] = useState<Skill | null>(null);
   const [showTips, setShowTips] = useState(false);
 
-  // A skill unlocks when the previous skill has at least 1 crown
-  const unlocked = new Set<string>();
-  for (let i = 0; i < skillOrder.length; i++) {
-    if (i === 0) {
-      unlocked.add(skillOrder[i]);
-      continue;
-    }
-    const prev = getSkillProgress(app, skillOrder[i - 1]);
-    if (prev.crowns >= 1) unlocked.add(skillOrder[i]);
-    else break;
-  }
+  // All skills are open — learn in any order, at your own pace
+  const unlocked = new Set<string>(skillOrder);
 
   return (
     <div className="path">

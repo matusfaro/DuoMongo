@@ -12,7 +12,7 @@ export interface ExerciseProps<T> {
 
 // ---- Choice (multiple choice, incl. listening) ----
 
-export function ChoiceEx({ ex, showRo, locked, onAnswerChange, selected, setSelected }: ExerciseProps<ChoiceExercise> & { selected: number | null; setSelected: (i: number) => void }) {
+export function ChoiceEx({ ex, showRo, locked, selected, onPick }: { ex: ChoiceExercise; showRo: boolean; locked: boolean; selected: number | null; onPick: (i: number) => void }) {
   const isListen = ex.type === 'listen-choice';
   useEffect(() => {
     if (isListen && ex.speak) speak(ex.speak);
@@ -48,10 +48,7 @@ export function ChoiceEx({ ex, showRo, locked, onAnswerChange, selected, setSele
             key={i}
             className={`option ${selected === i ? 'selected' : ''}`}
             disabled={locked}
-            onClick={() => {
-              setSelected(i);
-              onAnswerChange(true);
-            }}
+            onClick={() => onPick(i)}
           >
             <span className="option-num">{i + 1}</span> {opt}
           </button>
@@ -196,7 +193,7 @@ export function MatchEx({ ex, onComplete, onMistake }: { ex: MatchExercise; onCo
 
 // ---- Type answer ----
 
-export function TypeEx({ ex, showRo, locked, onAnswerChange, text, setText }: ExerciseProps<TypeExercise> & { text: string; setText: (t: string) => void }) {
+export function TypeEx({ ex, showRo, locked, onAnswerChange, text, setText, onEnter }: ExerciseProps<TypeExercise> & { text: string; setText: (t: string) => void; onEnter: () => void }) {
   return (
     <div className="ex">
       <h2 className="ex-title">Type the English translation</h2>
@@ -221,6 +218,12 @@ export function TypeEx({ ex, showRo, locked, onAnswerChange, text, setText }: Ex
         onChange={(e) => {
           setText(e.target.value);
           onAnswerChange(e.target.value.trim().length > 0);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (text.trim().length > 0) onEnter();
+          }
         }}
       />
     </div>
