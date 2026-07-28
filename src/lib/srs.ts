@@ -1,4 +1,4 @@
-import type { AppState, SrsCard } from '../types';
+import type { AppState, Skill, SrsCard } from '../types';
 import { setState } from './store';
 
 // Simplified SM-2 spaced repetition over item keys ("w:skill:word" / "s:skill:sentence")
@@ -61,6 +61,20 @@ export function weakestItems(s: AppState, limit: number): string[] {
 export function strengthOf(card: SrsCard | undefined): number {
   if (!card || card.due <= Date.now()) return 0;
   return card.intervalDays >= 7 ? 3 : card.intervalDays >= 3 ? 2 : 1;
+}
+
+/** A skill counts as gold once its combined word strength reaches this fraction. */
+export const GOLD_STRENGTH = 0.9;
+
+/** 0..1 — combined SRS strength of every word and sentence in the skill. */
+export function skillStrength(s: AppState, skill: Skill): number {
+  const keys = [
+    ...skill.vocab.map((v) => `w:${skill.id}:${v.id}`),
+    ...skill.sentences.map((se) => `s:${skill.id}:${se.id}`),
+  ];
+  if (keys.length === 0) return 0;
+  const total = keys.reduce((sum, k) => sum + strengthOf(s.srs[k]), 0);
+  return total / (keys.length * 3);
 }
 
 /** Manually mark an item as known: strong card, not due for a week, flag cleared. */

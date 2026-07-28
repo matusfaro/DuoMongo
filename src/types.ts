@@ -158,7 +158,6 @@ export interface Settings {
   reminderEnabled: boolean;
   reminderTime: string; // 'HH:MM'
   soundEnabled: boolean;
-  heartsEnabled: boolean;
   showRomanization: boolean;
 }
 
@@ -167,8 +166,6 @@ export interface AppState {
   createdAt: number;
   xp: number;
   gems: number;
-  hearts: number;
-  heartsUpdatedAt: number;
   streak: number;
   longestStreak: number;
   lastActiveDay: string | null; // YYYY-MM-DD

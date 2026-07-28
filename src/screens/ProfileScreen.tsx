@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { buyStreakFreeze, MAX_HEARTS, refillHearts, resetAllProgress, setState, todayKey, useAppState } from '../lib/store';
+import { buyStreakFreeze, resetAllProgress, setState, todayKey, useAppState } from '../lib/store';
 import { cancelReminders, ensureNotificationPermission, scheduleDailyReminder } from '../lib/notifications';
 
 export function ProfileScreen() {
@@ -37,21 +37,6 @@ export function ProfileScreen() {
         <h3>💎 Shop · {app.gems} gems</h3>
         <div className="shop-item">
           <div>
-            <b>Refill hearts</b>
-            <span>
-              {app.hearts}/{MAX_HEARTS} hearts · 350 gems
-            </span>
-          </div>
-          <button
-            className="btn-small"
-            disabled={app.hearts >= MAX_HEARTS || app.gems < 350 || !s.heartsEnabled}
-            onClick={() => refillHearts(350)}
-          >
-            REFILL
-          </button>
-        </div>
-        <div className="shop-item">
-          <div>
             <b>Streak freeze</b>
             <span>{app.streakFreezes}/2 equipped · protects a missed day · 200 gems</span>
           </div>
@@ -85,10 +70,6 @@ export function ProfileScreen() {
         <label className="setting-row">
           <span>Sound effects</span>
           <input type="checkbox" checked={s.soundEnabled} onChange={(e) => update({ soundEnabled: e.target.checked })} />
-        </label>
-        <label className="setting-row">
-          <span>Hearts (mistake limit)</span>
-          <input type="checkbox" checked={s.heartsEnabled} onChange={(e) => update({ heartsEnabled: e.target.checked })} />
         </label>
         <label className="setting-row">
           <span>Show romanization</span>

@@ -2,8 +2,6 @@ import { useSyncExternalStore } from 'react';
 import type { AppState, SkillProgress } from '../types';
 
 const KEY = 'duomongo-state-v1';
-export const MAX_HEARTS = 5;
-export const HEART_REGEN_MS = 30 * 60 * 1000;
 
 function defaultState(): AppState {
   return {
@@ -11,8 +9,6 @@ function defaultState(): AppState {
     createdAt: Date.now(),
     xp: 0,
     gems: 100,
-    hearts: MAX_HEARTS,
-    heartsUpdatedAt: Date.now(),
     streak: 0,
     longestStreak: 0,
     lastActiveDay: null,
@@ -35,7 +31,6 @@ function defaultState(): AppState {
       reminderEnabled: true,
       reminderTime: '19:00',
       soundEnabled: true,
-      heartsEnabled: true,
       showRomanization: true,
     },
   };
@@ -96,36 +91,6 @@ export function dayKeyOffset(offset: number, from = new Date()): string {
   const d = new Date(from);
   d.setDate(d.getDate() + offset);
   return todayKey(d);
-}
-
-/** Lazily regenerate hearts based on elapsed time. Call before reading hearts. */
-export function refreshHearts() {
-  setState((s) => {
-    if (!s.settings.heartsEnabled || s.hearts >= MAX_HEARTS) return { ...s, heartsUpdatedAt: Date.now() };
-    const elapsed = Date.now() - s.heartsUpdatedAt;
-    const gained = Math.floor(elapsed / HEART_REGEN_MS);
-    if (gained <= 0) return s;
-    const hearts = Math.min(MAX_HEARTS, s.hearts + gained);
-    return { ...s, hearts, heartsUpdatedAt: hearts >= MAX_HEARTS ? Date.now() : s.heartsUpdatedAt + gained * HEART_REGEN_MS };
-  });
-}
-
-export function loseHeart() {
-  setState((s) => {
-    if (!s.settings.heartsEnabled) return s;
-    const hearts = Math.max(0, s.hearts - 1);
-    return { ...s, hearts, heartsUpdatedAt: s.hearts === MAX_HEARTS ? Date.now() : s.heartsUpdatedAt };
-  });
-}
-
-export function refillHearts(costGems: number): boolean {
-  let ok = false;
-  setState((s) => {
-    if (s.gems < costGems) return s;
-    ok = true;
-    return { ...s, gems: s.gems - costGems, hearts: MAX_HEARTS, heartsUpdatedAt: Date.now() };
-  });
-  return ok;
 }
 
 export function buyStreakFreeze(costGems: number): boolean {

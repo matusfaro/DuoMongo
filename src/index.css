@@ -306,6 +306,28 @@ button {
   margin: 6px 0 10px;
 }
 
+.modal-strength {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.modal-strength .strength-track {
+  height: 10px;
+  background: var(--bg-2);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.modal-strength .strength-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
 .tips {
   text-align: left;
   background: var(--bg-2);
@@ -434,11 +456,6 @@ button {
   background: var(--green);
   border-radius: 8px;
   transition: width 0.3s;
-}
-
-.lesson-hearts {
-  font-weight: 800;
-  color: var(--red);
 }
 
 .lesson-title-row {

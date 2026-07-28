@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { BankExercise, ChoiceExercise, Exercise, MatchExercise, ShadowExercise, TypeExercise } from '../types';
 import { BankEx, bankAnswerText, checkBank, ChoiceEx, checkType, MatchEx, ShadowEx, TypeEx } from '../components/exercises';
 import { playComplete, playCorrect, playWrong, speak } from '../lib/audio';
-import { getState, loseHeart, toggleFlag, useAppState } from '../lib/store';
+import { toggleFlag, useAppState } from '../lib/store';
 import { reviewItem } from '../lib/srs';
 
 export interface LessonResult {
@@ -11,7 +11,6 @@ export interface LessonResult {
   total: number;
   perfect: boolean;
   durationMs: number;
-  outOfHearts: boolean;
 }
 
 interface Props {
@@ -62,19 +61,18 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     setFeedback(null);
   };
 
-  const finish = (outOfHearts: boolean) => {
+  const finish = () => {
     const t = totalRef.current;
-    const perfect = t.mistakes === 0 && !outOfHearts;
+    const perfect = t.mistakes === 0;
     const base = isPractice ? 10 : 10;
-    const xp = outOfHearts ? 0 : base + (perfect ? 5 : 0) + Math.min(5, Math.floor(t.correct / 5));
-    if (!outOfHearts && soundOn) playComplete();
+    const xp = base + (perfect ? 5 : 0) + Math.min(5, Math.floor(t.correct / 5));
+    if (soundOn) playComplete();
     onFinish({
       xp,
       correct: t.correct,
       total: t.answers,
       perfect,
       durationMs: Date.now() - startTime.current,
-      outOfHearts,
     });
   };
 
@@ -88,7 +86,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       setQueue((q) => [...q, current]);
     }
     if (idx + 1 >= queue.length + (wasCorrect ? 0 : 1)) {
-      finish(false);
+      finish();
       return;
     }
     setIdx((i) => i + 1);
@@ -126,7 +124,6 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       totalRef.current.mistakes += 1;
       setCombo(0);
       if (soundOn) playWrong();
-      loseHeart();
     }
     if (ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, correct);
     setFeedback({ kind: correct ? 'correct' : 'wrong', correctAnswer });
@@ -134,8 +131,6 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     if (correct) {
       // auto-advance quickly — no CONTINUE tap needed when right
       advTimer.current = setTimeout(() => advance(true, ex), 400);
-    } else if (getState().settings.heartsEnabled && getState().hearts <= 0) {
-      setTimeout(() => finish(true), 1200);
     }
   };
 
@@ -144,7 +139,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     advance(feedback.kind === 'correct', ex);
   };
 
-  // self-graded shadowing: honesty-based, never costs a heart
+  // self-graded shadowing: honesty-based
   const gradeShadow = (good: boolean) => {
     if (!ex) return;
     totalRef.current.answers += 1;
@@ -163,7 +158,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     totalRef.current.correct += 1;
     if (soundOn) playCorrect();
     if (idx + 1 >= queue.length) {
-      finish(false);
+      finish();
     } else {
       setIdx((i) => i + 1);
       resetAnswerState();
@@ -174,15 +169,6 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     totalRef.current.mistakes += 1;
     if (soundOn) playWrong();
   };
-
-  const hearts = useMemo(() => {
-    if (!app.settings.heartsEnabled) return null;
-    return (
-      <span className="lesson-hearts">
-        ❤️ <b>{app.hearts}</b>
-      </span>
-    );
-  }, [app.hearts, app.settings.heartsEnabled]);
 
   if (!ex) return null;
 
@@ -195,7 +181,6 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${Math.max(3, progress * 100)}%` }} />
         </div>
-        {hearts}
       </div>
       <div className="lesson-title-row">
         <span className="lesson-name">{title}</span>

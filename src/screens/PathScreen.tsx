@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CROWN_LEVELS, LESSONS_PER_LEVEL, sections, skillOrder } from '../data/course';
 import type { Skill } from '../types';
 import { getSkillProgress, useAppState } from '../lib/store';
+import { GOLD_STRENGTH, skillStrength } from '../lib/srs';
 
 interface Props {
   onStartLesson: (skill: Skill) => void;
@@ -31,15 +32,16 @@ export function PathScreen({ onStartLesson, onOpenStories }: Props) {
           <div className="section-header" style={{ background: sec.color }}>
             <div className="section-title">{sec.title}</div>
             <div className="section-sub">
-              {sec.skills.filter((sk) => getSkillProgress(app, sk.id).crowns >= CROWN_LEVELS).length}/{sec.skills.length} skills mastered
+              {sec.skills.filter((sk) => skillStrength(app, sk) >= GOLD_STRENGTH).length}/{sec.skills.length} skills gold
             </div>
           </div>
           <div className="skill-nodes">
             {sec.skills.map((sk, i) => {
               const prog = getSkillProgress(app, sk.id);
               const isUnlocked = unlocked.has(sk.id);
-              const mastered = prog.crowns >= CROWN_LEVELS;
-              const pct = (prog.crowns * LESSONS_PER_LEVEL + prog.lessonsDone) / (CROWN_LEVELS * LESSONS_PER_LEVEL);
+              // ring = how well you know the skill's words, gold = all of them strong
+              const pct = skillStrength(app, sk);
+              const mastered = pct >= GOLD_STRENGTH;
               return (
                 <div key={sk.id} className={`skill-node offset-${i % 4}`}>
                   <button
@@ -86,7 +88,8 @@ export function PathScreen({ onStartLesson, onOpenStories }: Props) {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             {(() => {
               const prog = getSkillProgress(app, openSkill.id);
-              const mastered = prog.crowns >= CROWN_LEVELS;
+              const allCrowns = prog.crowns >= CROWN_LEVELS;
+              const strength = skillStrength(app, openSkill);
               return (
                 <>
                   <div className="modal-icon">{openSkill.icon}</div>
@@ -99,9 +102,18 @@ export function PathScreen({ onStartLesson, onOpenStories }: Props) {
                     ))}
                   </div>
                   <div className="modal-sub">
-                    {mastered
-                      ? 'Mastered! Practice to keep it fresh.'
+                    {allCrowns
+                      ? 'All levels complete! Practice to keep it gold.'
                       : `Level ${prog.crowns + 1} · Lesson ${prog.lessonsDone + 1} of ${LESSONS_PER_LEVEL}`}
+                  </div>
+                  <div className="modal-strength">
+                    <div className="strength-track">
+                      <div
+                        className="strength-fill"
+                        style={{ width: `${Math.round(strength * 100)}%`, background: strength >= GOLD_STRENGTH ? '#ffc800' : undefined }}
+                      />
+                    </div>
+                    <span>{Math.round(strength * 100)}% word strength</span>
                   </div>
                   {showTips && openSkill.tips ? (
                     <div className="tips">
@@ -123,7 +135,7 @@ export function PathScreen({ onStartLesson, onOpenStories }: Props) {
                         onStartLesson(openSkill);
                       }}
                     >
-                      {mastered ? 'PRACTICE +10 XP' : `START LESSON +10 XP`}
+                      {allCrowns ? 'PRACTICE +10 XP' : `START LESSON +10 XP`}
                     </button>
                   </div>
                 </>

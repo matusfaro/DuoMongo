@@ -21,9 +21,12 @@ Android app.
 - **Crown levels**: each skill has 5 levels × 3 lessons; higher levels serve
   harder exercise types. All skills are open from the start.
 - **Spaced repetition**: every word/sentence is tracked with an SM-2-style
-  scheduler; the Practice tab reviews due or weakest items.
+  scheduler; the Practice tab reviews due or weakest items. Each skill's
+  progress ring shows the combined strength of its words — it fills as you
+  learn and turns gold when everything is strong.
 - **Gamification**: XP with a configurable daily goal, streak with streak
-  freezes, gems, hearts (optional), combo bonuses, 16 achievements.
+  freezes, gems, combo bonuses, 16 achievements. No hearts/lives — mistakes
+  never lock you out.
 - **Stats**: weekly XP chart, 12-week activity heatmap, accuracy, time spent,
   words learned, best streak.
 - **Stories**: four dialogues with line-by-line audio, tap-to-translate, and

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Exercise, Skill } from './types';
 import { CROWN_LEVELS, LESSONS_PER_LEVEL } from './data/course';
-import { advanceSkill, getSkillProgress, getState, recordSession, refreshHearts, todayKey, useAppState } from './lib/store';
+import { advanceSkill, getSkillProgress, getState, recordSession, todayKey, useAppState } from './lib/store';
 import { generateLesson, generatePractice } from './lib/exgen';
 import { dueItems, weakestItems } from './lib/srs';
 import { checkAchievements, type AchievementDef } from './lib/achievements';
@@ -34,11 +34,8 @@ export default function App() {
   const [storiesOpen, setStoriesOpen] = useState(false);
   const [lesson, setLesson] = useState<ActiveLesson | null>(null);
   const [resultView, setResultView] = useState<ResultView | null>(null);
-  const [noHearts, setNoHearts] = useState(false);
 
   useEffect(() => {
-    refreshHearts();
-    const iv = setInterval(refreshHearts, 60_000);
     // (re)schedule reminders on launch
     if (getState().settings.reminderEnabled) {
       void ensureNotificationPermission().then((ok) => {
@@ -47,16 +44,10 @@ export default function App() {
         if (ok) void scheduleDailyReminder(s.settings.reminderTime, s.streak, met);
       });
     }
-    return () => clearInterval(iv);
   }, []);
 
   const startLesson = (skill: Skill) => {
-    refreshHearts();
     const st = getState();
-    if (st.settings.heartsEnabled && st.hearts <= 0) {
-      setNoHearts(true);
-      return;
-    }
     const prog = getSkillProgress(st, skill.id);
     const mastered = prog.crowns >= CROWN_LEVELS;
     const exercises = mastered
@@ -66,12 +57,7 @@ export default function App() {
   };
 
   const startPractice = () => {
-    refreshHearts();
     const st = getState();
-    if (st.settings.heartsEnabled && st.hearts <= 0) {
-      setNoHearts(true);
-      return;
-    }
     // flagged items come first, then due reviews, then weakest
     const flaggedKeys = Object.keys(st.flagged).filter((k) => k.startsWith('w:') || k.startsWith('s:'));
     let keys = [...new Set([...flaggedKeys, ...dueItems(st, 12)])].slice(0, 12);
@@ -85,10 +71,6 @@ export default function App() {
     const l = lesson;
     setLesson(null);
     if (!l) return;
-    if (r.outOfHearts) {
-      setNoHearts(true);
-      return;
-    }
     recordSession(r.xp, {
       perfect: r.perfect,
       isPractice: l.isPractice,
@@ -132,11 +114,6 @@ export default function App() {
         <span className="topbar-stat" title="Gems">
           💎 {app.gems}
         </span>
-        {app.settings.heartsEnabled && (
-          <span className="topbar-stat" title="Hearts">
-            ❤️ {app.hearts}
-          </span>
-        )}
         <span className={`topbar-goal ${goalMet ? 'met' : ''}`} title="Daily goal">
           ⚡ {todayXp}/{app.settings.dailyGoal}
         </span>
@@ -204,21 +181,6 @@ export default function App() {
         </div>
       )}
 
-      {noHearts && (
-        <div className="modal-backdrop" onClick={() => setNoHearts(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">💔</div>
-            <h3>You're out of hearts!</h3>
-            <p className="modal-sub">
-              Hearts refill over time (1 every 30 min), or refill instantly in the shop. You can also turn hearts off in
-              settings.
-            </p>
-            <button className="btn-big btn-green" onClick={() => setNoHearts(false)}>
-              GOT IT
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
