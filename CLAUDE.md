@@ -22,7 +22,9 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
 If no device is connected (`adb devices` empty), say so instead of failing
-silently.
+silently. The device may appear twice over wireless debugging (duplicate
+`_adb-tls-connect` entries) — if `adb install` fails with "more than one
+device/emulator", pick one entry with `adb -s <serial> install ...`.
 
 # User Data Compatibility (CRITICAL)
 
