@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { buyStreakFreeze, MAX_HEARTS, refillHearts, resetAllProgress, setState, useAppState } from '../lib/store';
+import { buyStreakFreeze, MAX_HEARTS, refillHearts, resetAllProgress, setState, todayKey, useAppState } from '../lib/store';
 import { cancelReminders, ensureNotificationPermission, scheduleDailyReminder } from '../lib/notifications';
 
 export function ProfileScreen() {
@@ -13,7 +13,8 @@ export function ProfileScreen() {
     update({ reminderEnabled: enabled, reminderTime: time });
     if (enabled) {
       const ok = await ensureNotificationPermission();
-      if (ok) await scheduleDailyReminder(time, app.streak);
+      const met = (app.xpByDay[todayKey()] ?? 0) >= app.settings.dailyGoal;
+      if (ok) await scheduleDailyReminder(time, app.streak, met);
     } else {
       await cancelReminders();
     }

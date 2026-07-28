@@ -42,7 +42,9 @@ export default function App() {
     // (re)schedule reminders on launch
     if (getState().settings.reminderEnabled) {
       void ensureNotificationPermission().then((ok) => {
-        if (ok) void scheduleDailyReminder(getState().settings.reminderTime, getState().streak);
+        const s = getState();
+        const met = (s.xpByDay[todayKey()] ?? 0) >= s.settings.dailyGoal;
+        if (ok) void scheduleDailyReminder(s.settings.reminderTime, s.streak, met);
       });
     }
     return () => clearInterval(iv);
@@ -96,9 +98,11 @@ export default function App() {
     });
     if (l.skillId) advanceSkill(l.skillId, LESSONS_PER_LEVEL, CROWN_LEVELS);
     const newAchievements = checkAchievements(getState());
-    // refresh streak-danger notification with the new streak
+    // refresh reminders — silences today's if the goal is now met
     if (getState().settings.reminderEnabled) {
-      void scheduleDailyReminder(getState().settings.reminderTime, getState().streak);
+      const s = getState();
+      const met = (s.xpByDay[todayKey()] ?? 0) >= s.settings.dailyGoal;
+      void scheduleDailyReminder(s.settings.reminderTime, s.streak, met);
     }
     setResultView({ result: r, newAchievements });
   };

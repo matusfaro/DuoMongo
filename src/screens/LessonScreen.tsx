@@ -200,15 +200,6 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       <div className="lesson-title-row">
         <span className="lesson-name">{title}</span>
         {combo >= 3 && <span className="combo">🔥 {combo} in a row</span>}
-        {(ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) && (
-          <button
-            className={`flag-btn ${app.flagged[ex.itemKey] ? 'on' : ''}`}
-            onClick={() => toggleFlag(ex.itemKey)}
-            title="Practice this more later"
-          >
-            🚩 {app.flagged[ex.itemKey] ? 'Will practice' : 'Practice later'}
-          </button>
-        )}
       </div>
 
       <div className="lesson-body">
@@ -233,6 +224,13 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
         {ex.type === 'match' && <MatchEx ex={ex as MatchExercise} onComplete={matchDone} onMistake={matchMistake} />}
         {ex.type === 'speak-shadow' && <ShadowEx ex={ex as ShadowExercise} showRo={app.settings.showRomanization} onGrade={gradeShadow} />}
       </div>
+
+      {(ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) && (
+        <label className="flag-check">
+          <input type="checkbox" checked={!!app.flagged[ex.itemKey]} onChange={() => toggleFlag(ex.itemKey)} />
+          <span>🚩 Practice this later</span>
+        </label>
+      )}
 
       {ex.type !== 'match' && ex.type !== 'speak-shadow' && (
         <div

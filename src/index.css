@@ -1661,3 +1661,32 @@ button {
 .dict-flag:active {
   transform: scale(1.2);
 }
+
+.new-word-banner {
+  display: inline-block;
+  background: #ce82ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-bottom: 8px;
+}
+
+.flag-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.flag-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red);
+}

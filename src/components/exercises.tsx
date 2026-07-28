@@ -26,6 +26,7 @@ export function ChoiceEx({ ex, showRo, locked, selected, onPick }: { ex: ChoiceE
   const audioOnly = ex.type === 'listen-choice' || ex.type === 'minpair';
   return (
     <div className="ex">
+      {ex.newWordId && <div className="new-word-banner">✨ NEW WORD</div>}
       <h2 className="ex-title">{CHOICE_TITLES[ex.type]}</h2>
       {audioOnly ? (
         <button className="listen-big" onClick={() => ex.speak && speak(ex.speak)} aria-label="Play audio">

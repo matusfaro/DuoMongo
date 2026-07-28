@@ -21,12 +21,29 @@ export function normalizeAnswer(s: string): string {
   return s
     .toLowerCase()
     .replace(/[.,!?;:'’"«»\-—()]/g, '')
+    .replace(/\b(a|an|the)\b/g, ' ') // articles are never required — Mongolian has none
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 function tokenize(s: string): string[] {
   return s.replace(/[.,!?;:«»]/g, '').split(/\s+/).filter(Boolean);
+}
+
+// Proper nouns keep their capital in word-bank tiles; everything else is
+// lowercased so the capitalized first word doesn't give the order away.
+const PROPER_PREFIXES = [
+  'Монгол', 'Улаанбаатар', 'Бат', 'Сараа', 'Америк', 'Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба', 'Ням',
+  'I', 'Mongolia', 'Mongolian', 'Ulaanbaatar', 'Bat', 'Saraa', 'America', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+];
+
+function tile(token: string): string {
+  if (PROPER_PREFIXES.some((p) => token === p || token.startsWith(p))) return token;
+  return token.toLowerCase();
+}
+
+function tiles(tokens: string[]): string[] {
+  return tokens.map(tile);
 }
 
 // ---- distractor pools ----
@@ -135,24 +152,24 @@ function listenChoice(skill: Skill, item: VocabItem): ChoiceExercise {
 function bankFromSentence(skill: Skill, sent: Sentence, dir: 'mn-en' | 'en-mn'): BankExercise {
   const key = `s:${skill.id}:${sent.id}`;
   if (dir === 'mn-en') {
-    const answerTokens = tokenize(sent.en);
+    const answerTokens = tiles(tokenize(sent.en));
     return {
       type: 'bank-mn-en',
       prompt: sent.mn,
       promptRo: sent.ro,
       speak: sent.mn,
       answerTokens,
-      bankTokens: shuffle([...answerTokens, ...bankDistractorTokens('en', answerTokens, Math.min(4, answerTokens.length + 2))]),
+      bankTokens: shuffle([...answerTokens, ...tiles(bankDistractorTokens('en', answerTokens, Math.min(4, answerTokens.length + 2)))]),
       acceptedAnswers: [sent.en, ...(sent.altEn ?? [])].map(normalizeAnswer),
       itemKey: key,
     };
   }
-  const answerTokens = tokenize(sent.mn);
+  const answerTokens = tiles(tokenize(sent.mn));
   return {
     type: 'bank-en-mn',
     prompt: sent.en,
     answerTokens,
-    bankTokens: shuffle([...answerTokens, ...bankDistractorTokens('mn', answerTokens, Math.min(4, answerTokens.length + 2))]),
+    bankTokens: shuffle([...answerTokens, ...tiles(bankDistractorTokens('mn', answerTokens, Math.min(4, answerTokens.length + 2)))]),
     acceptedAnswers: [normalizeAnswer(sent.mn)],
     itemKey: key,
   };
@@ -172,14 +189,14 @@ function typeFromSentence(skill: Skill, sent: Sentence): TypeExercise {
 
 /** Dictation: hear the Mongolian sentence, assemble it from Mongolian tiles. */
 function dictationFromSentence(skill: Skill, sent: Sentence): BankExercise {
-  const answerTokens = tokenize(sent.mn);
+  const answerTokens = tiles(tokenize(sent.mn));
   return {
     type: 'bank-listen-mn',
     prompt: sent.mn,
     promptRo: sent.ro,
     speak: sent.mn,
     answerTokens,
-    bankTokens: shuffle([...answerTokens, ...bankDistractorTokens('mn', answerTokens, Math.min(4, answerTokens.length + 2))]),
+    bankTokens: shuffle([...answerTokens, ...tiles(bankDistractorTokens('mn', answerTokens, Math.min(4, answerTokens.length + 2)))]),
     acceptedAnswers: [normalizeAnswer(sent.mn)],
     itemKey: `s:${skill.id}:${sent.id}`,
   };
@@ -200,14 +217,14 @@ function clozeFromSentence(skill: Skill, sent: Sentence): ChoiceExercise | null 
     .filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i)
     .slice(0, 3);
   if (distractors.length < 3) return null;
-  const options = shuffle([target.t, ...distractors]);
+  const options = shuffle([target.t, ...distractors].map(tile));
   return {
     type: 'cloze',
     prompt: blanked,
     sub: `"${sent.en}"`,
     speak: sent.mn, // spoken after answering — would give the answer away up front
     options,
-    correctIndex: options.indexOf(target.t),
+    correctIndex: options.indexOf(tile(target.t)),
     itemKey: `s:${skill.id}:${sent.id}`,
   };
 }
@@ -306,40 +323,44 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
   const vocab = rotated.slice(0, vocabCount);
   const sentences = pick(skill.sentences, Math.min(5, skill.sentences.length));
 
+  // New words are introduced FIRST (Duolingo-style teaching card), before any
+  // sentence or harder exercise can spring them on the learner.
+  const intros: Exercise[] = [];
   const exercises: Exercise[] = [];
 
   for (const v of vocab) {
     const isNew = !known.has(`w:${skill.id}:${v.id}`);
-    if (isNew || crownLevel === 0) {
-      // introduce with a picture card when the word has one, else classic choice
-      const pic = Math.random() < 0.5 ? pictureFromVocab(skill, v, isNew) : null;
-      exercises.push(pic ?? choiceFromVocab(skill, v, 'mn-en', isNew));
-      if (exercises.length % 3 === 0) exercises.push(choiceFromVocab(skill, v, 'en-mn', false));
+    if (isNew) {
+      intros.push(pictureFromVocab(skill, v, true) ?? choiceFromVocab(skill, v, 'mn-en', true));
+      continue;
+    }
+    if (crownLevel === 0) {
+      const pic = Math.random() < 0.4 ? pictureFromVocab(skill, v, false) : null;
+      exercises.push(pic ?? choiceFromVocab(skill, v, Math.random() < 0.6 ? 'mn-en' : 'en-mn', false));
     } else if (crownLevel <= 2) {
-      exercises.push(choiceFromVocab(skill, v, Math.random() < 0.5 ? 'mn-en' : 'en-mn', false));
+      const r = Math.random();
+      if (r < 0.2) exercises.push(listenChoice(skill, v));
+      else exercises.push(choiceFromVocab(skill, v, r < 0.6 ? 'mn-en' : 'en-mn', false));
     } else {
       exercises.push(Math.random() < 0.4 ? listenChoice(skill, v) : choiceFromVocab(skill, v, 'en-mn', false));
     }
   }
 
   for (const s of sentences) {
+    const r = Math.random();
     if (crownLevel === 0) {
-      exercises.push(bankFromSentence(skill, s, 'mn-en'));
+      if (r < 0.15) exercises.push(clozeFromSentence(skill, s) ?? bankFromSentence(skill, s, 'mn-en'));
+      else exercises.push(bankFromSentence(skill, s, 'mn-en'));
     } else if (crownLevel === 1) {
-      const r = Math.random();
-      const cloze = r < 0.25 ? clozeFromSentence(skill, s) : null;
-      exercises.push(cloze ?? bankFromSentence(skill, s, r < 0.6 ? 'mn-en' : 'en-mn'));
+      if (r < 0.2) exercises.push(clozeFromSentence(skill, s) ?? bankFromSentence(skill, s, 'en-mn'));
+      else if (r < 0.35) exercises.push(dictationFromSentence(skill, s));
+      else exercises.push(bankFromSentence(skill, s, r < 0.7 ? 'mn-en' : 'en-mn'));
     } else if (crownLevel <= 3) {
-      const r = Math.random();
-      if (r < 0.2) {
-        exercises.push(dictationFromSentence(skill, s));
-      } else if (r < 0.4) {
-        exercises.push(clozeFromSentence(skill, s) ?? bankFromSentence(skill, s, 'en-mn'));
-      } else {
-        exercises.push(bankFromSentence(skill, s, r < 0.7 ? 'mn-en' : 'en-mn'));
-      }
+      if (r < 0.2) exercises.push(dictationFromSentence(skill, s));
+      else if (r < 0.35) exercises.push(clozeFromSentence(skill, s) ?? bankFromSentence(skill, s, 'en-mn'));
+      else if (r < 0.5 && crownLevel >= 2) exercises.push(shadowFromSentence(skill, s));
+      else exercises.push(bankFromSentence(skill, s, r < 0.75 ? 'mn-en' : 'en-mn'));
     } else {
-      const r = Math.random();
       if (r < 0.3) exercises.push(typeFromSentence(skill, s));
       else if (r < 0.5) exercises.push(dictationFromSentence(skill, s));
       else if (r < 0.65) exercises.push(shadowFromSentence(skill, s));
@@ -347,15 +368,15 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
     }
   }
 
-  // conversational replies from crown 1 up
-  if (crownLevel >= 1 && skill.replies?.length) {
+  // conversational replies at every level
+  if (skill.replies?.length) {
     for (const pair of pick(skill.replies, Math.min(2, skill.replies.length))) {
       exercises.push(replyExercise(skill, pair));
     }
   }
 
-  // ear training from crown 1 up when the skill has sound-alike words
-  if (crownLevel >= 1) {
+  // ear training when the skill has sound-alike words
+  {
     const pairs = skillMinPairs(skill);
     if (pairs.length > 0) {
       for (const pair of pick(pairs, Math.min(2, pairs.length))) {
@@ -367,10 +388,12 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
   // One matching exercise per lesson if enough vocab
   const matchable = unambiguousSubset(shuffle(skill.vocab));
   if (matchable.length >= 4) {
-    exercises.splice(Math.min(4, exercises.length), 0, matchFromVocab(skill, matchable.slice(0, 5)));
+    exercises.push(matchFromVocab(skill, matchable.slice(0, 5)));
   }
 
-  return shuffle(exercises).slice(0, 14);
+  // intros lead, everything else shuffles in behind them
+  const rest = shuffle(exercises).slice(0, Math.max(6, 14 - intros.length));
+  return [...intros, ...rest];
 }
 
 /** Generate a practice session from SRS item keys (mixed skills). */
