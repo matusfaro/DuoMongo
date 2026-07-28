@@ -10,6 +10,20 @@ native Android app.
 ALWAYS commit and push after completing a change — do not wait to be asked.
 Verify first (`npm run build` + `npm run lint`), then commit and push.
 
+# Android Deploy (CRITICAL)
+
+After committing a change, ALWAYS build the updated APK and push it to the
+connected Android device:
+
+```sh
+npm run build && npx cap sync android
+cd android && ./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+If no device is connected (`adb devices` empty), say so instead of failing
+silently.
+
 # User Data Compatibility (CRITICAL)
 
 We MUST retain existing deployed device progress (e.g. the user's Android
