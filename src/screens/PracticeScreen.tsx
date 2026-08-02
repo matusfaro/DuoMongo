@@ -1,5 +1,5 @@
 import { toggleFlag, useAppState } from '../lib/store';
-import { dueCount, wordsLearnedCount } from '../lib/srs';
+import { dueCount, retrievabilityOf, strengthOf, wordsLearnedCount } from '../lib/srs';
 import { sentenceByKey, vocabByKey } from '../data/course';
 import { speak } from '../lib/audio';
 
@@ -12,13 +12,12 @@ export function PracticeScreen({ onStartPractice }: Props) {
   const due = dueCount(app);
   const learned = wordsLearnedCount(app);
 
+  const now = Date.now();
   const wordRows = Object.entries(app.srs)
     .filter(([k]) => k.startsWith('w:'))
-    .map(([k, card]) => ({ entry: vocabByKey.get(k), card }))
+    .map(([k, card]) => ({ entry: vocabByKey.get(k), card, r: retrievabilityOf(app, card, now) }))
     .filter((r) => r.entry)
-    .sort((a, b) => a.card.ease - b.card.ease);
-
-  const now = Date.now();
+    .sort((a, b) => a.r - b.r); // most-forgotten first
 
   return (
     <div className="practice-screen">
@@ -71,7 +70,7 @@ export function PracticeScreen({ onStartPractice }: Props) {
           <h3>Your words ({learned})</h3>
           {wordRows.map(({ entry, card }) => {
             const v = entry!.item;
-            const strength = card.due > now ? (card.intervalDays >= 7 ? 3 : card.intervalDays >= 3 ? 2 : 1) : 0;
+            const strength = strengthOf(card);
             return (
               <div key={v.id + entry!.skillId} className="word-row">
                 <div>

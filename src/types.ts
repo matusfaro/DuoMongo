@@ -139,13 +139,32 @@ export type Exercise = ChoiceExercise | BankExercise | MatchExercise | TypeExerc
 
 // ---- Progress / persistence ----
 
+/** FSRS memory card (plain numbers for JSON persistence; converted to ts-fsrs Card at the srs.ts boundary). */
 export interface SrsCard {
+  due: number; // epoch ms
+  last: number; // epoch ms of last review (0 = never reviewed)
+  stability: number; // FSRS S, days
+  difficulty: number; // FSRS D, 1..10
+  reps: number;
+  lapses: number;
+  learningSteps: number; // position within (re)learning steps
+  state: 0 | 1 | 2 | 3; // ts-fsrs State: New / Learning / Review / Relearning
+}
+
+/** Pre-FSRS card shape (SM-2), still present in persisted states with version < 2. */
+export interface LegacySrsCard {
   ease: number;
   intervalDays: number;
-  due: number; // epoch ms
+  due: number;
   reps: number;
   lapses: number;
 }
+
+/** FSRS rating: 1 Again · 2 Hard · 3 Good · 4 Easy. */
+export type Grade = 1 | 2 | 3 | 4;
+
+/** Compact review-history tuple for the on-device weight optimizer. */
+export type ReviewLogEntry = [key: string, ts: number, grade: Grade];
 
 export interface SkillProgress {
   crowns: number; // 0..5
@@ -159,6 +178,7 @@ export interface Settings {
   reminderTime: string; // 'HH:MM'
   soundEnabled: boolean;
   showRomanization: boolean;
+  targetRetention: number; // FSRS desired recall probability at review time (0.8..0.95)
 }
 
 export interface AppState {
@@ -179,6 +199,8 @@ export interface AppState {
   practiceSessions: number;
   storiesDone: Record<string, number>; // story id -> completions
   flagged: Record<string, number>; // item key -> flagged-at timestamp (wants extra practice)
+  reviewLog: ReviewLogEntry[]; // capped history for fitting FSRS weights
+  fsrsWeights: number[] | null; // personalized FSRS-6 weights; null = ts-fsrs defaults
   totalAnswers: number;
   correctAnswers: number;
   timeSpentMs: number;

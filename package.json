@@ -19,7 +19,8 @@
     "@capacitor/local-notifications": "^8.2.1",
     "@capacitor/preferences": "^8.0.1",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "ts-fsrs": "^5.4.1"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",

@@ -3,7 +3,7 @@ import type { BankExercise, ChoiceExercise, Exercise, MatchExercise, ShadowExerc
 import { BankEx, bankAnswerText, checkBank, ChoiceEx, checkType, MatchEx, ShadowEx, TypeEx } from '../components/exercises';
 import { playComplete, playCorrect, playWrong, speak } from '../lib/audio';
 import { toggleFlag, useAppState } from '../lib/store';
-import { reviewItem } from '../lib/srs';
+import { gradeFromSignals, reviewItem } from '../lib/srs';
 
 export interface LessonResult {
   xp: number;
@@ -52,6 +52,8 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
   }, [idx, queue]);
 
   const advTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // when the current exercise was shown — answer latency feeds the FSRS grade
+  const exStart = useRef(Date.now());
 
   const resetAnswerState = () => {
     setSelected(null);
@@ -59,6 +61,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     setTyped('');
     setReady(false);
     setFeedback(null);
+    exStart.current = Date.now();
   };
 
   const finish = () => {
@@ -125,7 +128,9 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
       setCombo(0);
       if (soundOn) playWrong();
     }
-    if (ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, correct);
+    if (ex.itemKey.startsWith('w:') || ex.itemKey.startsWith('s:')) {
+      reviewItem(ex.itemKey, gradeFromSignals(correct, ex.type, Date.now() - exStart.current));
+    }
     setFeedback({ kind: correct ? 'correct' : 'wrong', correctAnswer });
 
     if (correct) {
@@ -149,7 +154,7 @@ export function LessonScreen({ exercises: initial, title, isPractice, onFinish, 
     } else {
       if (soundOn) playWrong();
     }
-    if (ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, good);
+    if (ex.itemKey.startsWith('s:')) reviewItem(ex.itemKey, good ? 3 : 1);
     advance(good, ex);
   };
 

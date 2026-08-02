@@ -1,11 +1,12 @@
 import { useSyncExternalStore } from 'react';
-import type { AppState, SkillProgress } from '../types';
+import type { AppState, LegacySrsCard, SkillProgress, SrsCard } from '../types';
 
 const KEY = 'duomongo-state-v1';
+const DAY = 24 * 60 * 60 * 1000;
 
 function defaultState(): AppState {
   return {
-    version: 1,
+    version: 2,
     createdAt: Date.now(),
     xp: 0,
     gems: 100,
@@ -22,6 +23,8 @@ function defaultState(): AppState {
     practiceSessions: 0,
     storiesDone: {},
     flagged: {},
+    reviewLog: [],
+    fsrsWeights: null,
     totalAnswers: 0,
     correctAnswers: 0,
     timeSpentMs: 0,
@@ -32,8 +35,34 @@ function defaultState(): AppState {
       reminderTime: '19:00',
       soundEnabled: true,
       showRomanization: true,
+      targetRetention: 0.9,
     },
   };
+}
+
+/** v1 (SM-2 {ease, intervalDays, ...}) -> v2 (FSRS {stability, difficulty, ...}) card conversion. */
+function migrateSrsCard(old: LegacySrsCard): SrsCard {
+  const clamp = (lo: number, hi: number, v: number) => Math.min(hi, Math.max(lo, v));
+  return {
+    due: old.due, // preserved exactly — no review-queue flood on upgrade
+    last: old.due - old.intervalDays * DAY,
+    stability: Math.max(0.2, old.intervalDays),
+    difficulty: clamp(1, 10, 1 + ((3.0 - old.ease) / (3.0 - 1.3)) * 9),
+    reps: old.reps,
+    lapses: old.lapses,
+    learningSteps: 0,
+    state: old.reps > 0 ? 2 : 1, // Review : Learning
+  };
+}
+
+function migrate(s: AppState): AppState {
+  if (s.version >= 2) return s;
+  const srs: Record<string, SrsCard> = {};
+  for (const [key, card] of Object.entries(s.srs)) {
+    // old cards have `ease`; anything already FSRS-shaped passes through
+    srs[key] = 'ease' in card ? migrateSrsCard(card as unknown as LegacySrsCard) : card;
+  }
+  return { ...s, version: 2, srs };
 }
 
 function load(): AppState {
@@ -41,7 +70,11 @@ function load(): AppState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw) as AppState;
-    return { ...defaultState(), ...parsed, settings: { ...defaultState().settings, ...parsed.settings } };
+    const merged = { ...defaultState(), ...parsed, settings: { ...defaultState().settings, ...parsed.settings } };
+    // saved state predates the new settings/version fields -> shallow merge gave
+    // it version 2 defaults; trust the persisted version when one was stored
+    merged.version = typeof parsed.version === 'number' ? parsed.version : 1;
+    return migrate(merged);
   } catch {
     return defaultState();
   }
@@ -159,25 +192,24 @@ export function advanceSkill(skillId: string, lessonsPerLevel: number, maxCrowns
   });
 }
 
-/** Toggle the practice flag on an item. Flagging resets its SRS card so it comes up immediately. */
+/** Toggle the practice flag on an item. Flagging makes it due now so it surfaces immediately. */
 export function toggleFlag(key: string) {
   setState((s) => {
+    const now = Date.now();
     const flagged = { ...s.flagged };
     if (flagged[key]) {
       delete flagged[key];
       return { ...s, flagged };
     }
-    flagged[key] = Date.now();
+    flagged[key] = now;
     const card = s.srs[key];
-    const srs = {
+    // Make it due immediately but keep its FSRS memory state intact — if the
+    // learner really forgot it, the next grade will lapse it properly.
+    const srs: typeof s.srs = {
       ...s.srs,
-      [key]: {
-        ease: Math.max(1.3, (card?.ease ?? 2.5) - 0.3),
-        intervalDays: 0,
-        due: Date.now(),
-        reps: 0,
-        lapses: card?.lapses ?? 0,
-      },
+      [key]: card
+        ? { ...card, due: now }
+        : { due: now, last: 0, stability: 0, difficulty: 0, reps: 0, lapses: 0, learningSteps: 0, state: 0 },
     };
     return { ...s, flagged, srs };
   });
