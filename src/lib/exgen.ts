@@ -259,26 +259,6 @@ function minpairExercise(skill: Skill, pair: [string, string]): ChoiceExercise {
   };
 }
 
-/** Picture card: word (with audio) → pick the matching emoji. */
-function pictureFromVocab(skill: Skill, item: VocabItem, isNew: boolean): ChoiceExercise | null {
-  if (!item.emoji) return null;
-  const pool = shuffle(allVocab.filter((v) => v.emoji && v.emoji !== item.emoji && !meaningsOverlap(v, item)));
-  const distractors = [...new Set(pool.map((v) => v.emoji!))].slice(0, 3);
-  if (distractors.length < 3) return null;
-  const options = shuffle([item.emoji, ...distractors]);
-  return {
-    type: 'picture',
-    prompt: item.mn,
-    promptRo: item.ro,
-    speak: item.mn,
-    options,
-    correctIndex: options.indexOf(item.emoji),
-    bigOptions: true,
-    newWordId: isNew ? item.id : undefined,
-    itemKey: `w:${skill.id}:${item.id}`,
-  };
-}
-
 /** Shadowing: hear the native clip, record yourself, self-grade. */
 function shadowFromSentence(skill: Skill, sent: Sentence): ShadowExercise {
   return {
@@ -331,12 +311,13 @@ export function generateLesson(state: AppState, skillId: string, crownLevel: num
   for (const v of vocab) {
     const isNew = !known.has(`w:${skill.id}:${v.id}`);
     if (isNew) {
-      intros.push(pictureFromVocab(skill, v, true) ?? choiceFromVocab(skill, v, 'mn-en', true));
+      intros.push(choiceFromVocab(skill, v, 'mn-en', true));
       continue;
     }
     if (crownLevel === 0) {
-      const pic = Math.random() < 0.4 ? pictureFromVocab(skill, v, false) : null;
-      exercises.push(pic ?? choiceFromVocab(skill, v, Math.random() < 0.6 ? 'mn-en' : 'en-mn', false));
+      const r = Math.random();
+      if (r < 0.2) exercises.push(listenChoice(skill, v));
+      else exercises.push(choiceFromVocab(skill, v, r < 0.65 ? 'mn-en' : 'en-mn', false));
     } else if (crownLevel <= 2) {
       const r = Math.random();
       if (r < 0.2) exercises.push(listenChoice(skill, v));
