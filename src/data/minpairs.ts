@@ -15,4 +15,10 @@ export const MIN_PAIRS: [string, string][] = [
   ['чи', 'чих'], // you / ear
   ['ам', 'аав'], // mouth / father
   ['өдөр', 'өвөл'], // day / winter — ө...ө lookalikes
+  ['нуур', 'нүүр'], // lake / face — у/ү with long vowels
+  ['дуу', 'дүү'], // song / younger sibling — у/ү
+  ['урт', 'урд'], // long / front — т/д finals
+  ['дээр', 'доор'], // on / under — э/о
+  ['хол', 'хөл'], // far / leg — о/ө
+  ['үг', 'үс'], // word / hair — г/с finals
 ];
