@@ -87,11 +87,28 @@ and `npm run lint`.
   `src/data/stories.ts`, `src/data/minpairs.ts` — stories and minimal pairs.
 - `src/types.ts` — shared types, including the persisted `AppState`.
 
-## Audio pipeline
+## Audio pipeline (CRITICAL — exact voice and build order)
 
-Every Mongolian text has a pre-generated mp3 (mn-MN neural voice) bundled in
-`public/audio/`, keyed by md5-hash filenames. `scripts/dump-texts.mts` dumps
-all unique course/story texts to `scripts/texts.json`; the generated mapping
-lives in `src/data/audio-manifest.json` and is read by `src/lib/audio.ts`.
-After adding or editing any Mongolian text, regenerate its clip and update the
-manifest — otherwise the new text will have no audio at runtime.
+Every Mongolian text has a pre-generated mp3 bundled in `public/audio/`,
+keyed by md5-hash filenames, mapped by `src/data/audio-manifest.json`, read by
+`src/lib/audio.ts`. All clips are **edge-tts, voice `mn-MN-YesuiNeural`,
+rate `-10%`** — never use any other voice/rate, or new clips won't match the
+rest of the course.
+
+After adding or editing ANY Mongolian text (course, stories, replies), run
+from the repo root:
+
+```sh
+npx tsx scripts/dump-texts.mts                            # refresh scripts/texts.json
+uvx --from edge-tts --with edge-tts python scripts/gen-audio.py  # gen missing clips + rebuild manifest
+npm run build                                             # MUST come after the two steps above
+npx cap sync android && cd android && ./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Order matters**: `npm run build` bundles the manifest into the JS and copies
+`public/audio/` into `dist/`. If you build before regenerating audio (or forget
+to rebuild after), the APK ships a stale manifest and any missing text silently
+falls back to device TTS — which reads Mongolian Cyrillic with a **Russian**
+voice and sounds ridiculous. This happened once; don't repeat it. Sanity check
+before syncing: `ls public/audio | wc -l` must equal `ls dist/audio | wc -l`.
